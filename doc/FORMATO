@@ -1,0 +1,18 @@
+C: 0x01
+S: "E"
+C: "00000000000000" (14)
+S: "DDMMYYYYHHmmss"
+TLS handshake
+C: (6 bytes) + deflate(hash)
+	hash: 0x40 + sequencia de chave/valor no formato
+		byte 0: tamanho da chave | 0x80 se tamanho do valor maior que 255 (ou 127?)
+		chave com numero de bytes igual ao tamanho
+		byte[X] = tamanho do valor, se menor ou igual a 255 (ou 127?)
+		ou byte[X] << 8 | byte[X+1] = tamanho do valor, se maior que 255 (ou 127?)
+		valor com numero de bytes igual ao tamanho
+	chaves: a_comp = 0x00 0x00 0x00 0x00 (4)
+		tp_arq = 0x00 0x00 0x08 0xfc (4) == 2300 em decimal, "Ajuste" (2321 - "Espolio", 2320 - "Saida")
+		id_dec = 0xXX 0xXX 0xXX 0xXX (4) == "hash" da declaracao com 10 digitos decimais
+			exemplo: se "hash" == 1000000000, id_dec == 0x3b 0x9a 0xca 0x00
+		exercicio = "2012"
+		exercico_pgd = "20122013"
