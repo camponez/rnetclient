@@ -17,3 +17,27 @@ C: (6 bytes) + deflate(hash)
 			exemplo: se "hash" == 1000000000, id_dec == 0x3b 0x9a 0xca 0x00
 		exercicio = "2012"
 		exercico_pgd = "20122013"
+		hash_arq = 16 bytes
+		hash_trans = 16 bytes == hash_arq
+		ni = "00000000000" (CPF em ascii)
+		tipo_ni = "CPF"
+		num_ass = 0x00 (assinatura e-CPF?)
+		p_comp = 0x00 0x00 0x00 0x00
+		ret = 0x00
+		tam_arq = 8 bytes
+		tam_assinado = 8 bytes == tam_arq
+		tam_trans = 8 bytes == tam_arq
+		uf = "SP" (UF)
+		vrs_des_pa = 0x00 (versão de desenvolvimento?)
+		versao_pgd = 0x00 0x78 (120, mesmo que nr_versao no DEC, segundo arquivo de leiaute)
+		critica_validador = 0x06 (??)
+		ip_loc = "127.0.0.1" (endereço IP local)
+		versao_java = "1.7.0_03-icedtea;OpenJDK Runtime Environment" (versão do Java em ASCII)
+			será que rola uma versão do GCC?
+		origem = "JA2R" (melhor repetir!)
+		so = "Linux"
+		cliente = "201104" (será a versão do receitanet?)
+		dados_val = parte do cabeçalho do DEC (desce in_cert até vr_totpagamentos) bytes 112 a 750
+		tam_dados_val = 0x00 0x00 0x00 0x00 (4 bytes)
+		tam_dados_val_chave = 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 (8 bytes)
+		arquivos_restantes = 0x00 0x00 0x00 0x00 (4 bytes)
