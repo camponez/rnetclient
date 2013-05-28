@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -125,7 +126,12 @@ int main(int argc, char **argv)
 	saddr.sin_family = AF_INET;
 	saddr.sin_port = htons(3456);
 	saddr.sin_addr.s_addr = inet_addr("161.148.185.140");
-	connect(c, (struct sockaddr *) &saddr, sizeof(saddr));
+	r = connect(c, (struct sockaddr *) &saddr, sizeof(saddr));
+	if (r < 0) {
+		fprintf(stderr, "error connecting to server: %s\n",
+			strerror(errno));
+		exit(1);
+	}
 	gnutls_transport_set_ptr(session, (gnutls_transport_ptr_t) c);
 	buffer[0] = 1;
 	write(c, buffer, 1);
