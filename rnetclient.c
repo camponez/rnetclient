@@ -116,7 +116,7 @@ int main(int argc, char **argv)
 	struct sockaddr_in saddr;
 	int c;
 	int r;
-	char buffer[1024];
+	char buffer[2048];
 	char *out;
 	size_t olen;
 	gnutls_session_t session;
