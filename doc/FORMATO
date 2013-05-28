@@ -4,6 +4,7 @@ C: "00000000000000" (14)
 S: "DDMMYYYYHHmmss"
 TLS handshake
 C: (6 bytes) + deflate(hash)
+	header: 0x01 0xII 0xII 0xOO 0xOO 0x01, II é o tamanho da entrada, OO é o tamanho da saída do deflate
 	hash: 0x40 + sequencia de chave/valor no formato
 		byte 0: tamanho da chave | 0x80 se tamanho do valor maior que 255 (ou 127?)
 		chave com numero de bytes igual ao tamanho
