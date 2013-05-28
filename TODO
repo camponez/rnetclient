@@ -1,0 +1,4 @@
+Immediately:
+* Support handshake protocol from Receitanet.
+* Support SSL after handshake.
+* Support compressed message packet.
