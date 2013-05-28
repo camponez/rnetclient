@@ -125,7 +125,7 @@ int main(int argc, char **argv)
 	c = socket(PF_INET, SOCK_STREAM, 0);
 	saddr.sin_family = AF_INET;
 	saddr.sin_port = htons(3456);
-	saddr.sin_addr.s_addr = inet_addr("161.148.185.140");
+	saddr.sin_addr.s_addr = inet_addr("161.148.185.11");
 	r = connect(c, (struct sockaddr *) &saddr, sizeof(saddr));
 	if (r < 0) {
 		fprintf(stderr, "error connecting to server: %s\n",
