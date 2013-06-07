@@ -41,3 +41,16 @@ C: (6 bytes) + deflate(hash)
 		tam_dados_val = 0x00 0x00 0x00 0x00 (4 bytes)
 		tam_dados_val_chave = 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 (8 bytes)
 		arquivos_restantes = 0x00 0x00 0x00 0x00 (4 bytes)
+S: (6 bytes) + deflate(hash)
+	header: 0x01 0xII 0xII 0xOO 0xOO 0x01, II é o tamanho da entrada, OO é o tamanho da saída do deflate
+	hash: 0xXX + sequencia de chave/valor no formato descrito acima (onde 0XX é um código)
+		0x01 - Sucesso
+			chave POS_INICIO - ??
+		0x03 - Erro
+			chave SUBTIPO
+			chave TEXTO: "XXXX.Erro xxxxxxxx", onde XXXX é o código de erro
+			chaves *ARQ*
+C: (6 bytes) + deflate(hash)
+	header: 0x01 0xII 0xII 0xOO 0xOO 0x01, II é o tamanho da entrada, OO é o tamanho da saída do deflate
+	conteúdo: arquivo DEC, com apenas os registros de declaração, ou seja, excluídos os registros de recibo, removido o número de controle (últimos 10 bytes) de todos os registros
+	O tamanho e o hash da mensagem anterior do cliente são o tamanho e o hash MD5 do conteúdo desta transmissão
