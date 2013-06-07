@@ -24,6 +24,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <gnutls/gnutls.h>
 #include <zlib.h>
 
@@ -111,9 +112,45 @@ static int inflateRecord(char *buffer, size_t len, char **out, size_t *olen)
 	return 0;
 }
 
+#define RNET_ADDRESS "receitanet.receita.fazenda.gov.br"
+
+static int connect_rnet(int *c)
+{
+	struct addrinfo *addresses;
+	struct addrinfo *addr;
+	struct addrinfo hint;
+	struct sockaddr_in saddr;
+	int r;
+	int fd = *c = -1;
+	int i;
+	memset(&hint, 0, sizeof(hint));
+	hint.ai_family = AF_UNSPEC;
+	hint.ai_socktype = SOCK_STREAM;
+	hint.ai_protocol = IPPROTO_TCP;
+	hint.ai_flags = AI_ADDRCONFIG;
+	r = getaddrinfo(RNET_ADDRESS, "3456", &hint, &addresses);
+	if (r) {
+		return r;
+	}
+	for (addr = addresses; addr != NULL; addr = addr->ai_next) {
+		fd = socket(addr->ai_family, addr->ai_socktype,
+				addr->ai_protocol);
+		if (fd >= 0)
+			if (!(r = connect(fd, addr->ai_addr,
+						addr->ai_addrlen)))
+				break;
+		close(fd);
+		fd = -1;
+	}
+	freeaddrinfo(addresses);
+	*c = fd;
+	if (fd == -1)
+		return EAI_SYSTEM;
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
-	struct sockaddr_in saddr;
 	int c;
 	int r;
 	char buffer[2048];
@@ -122,14 +159,10 @@ int main(int argc, char **argv)
 	gnutls_session_t session;
 	gnutls_global_init();
 	session_new(&session);
-	c = socket(PF_INET, SOCK_STREAM, 0);
-	saddr.sin_family = AF_INET;
-	saddr.sin_port = htons(3456);
-	saddr.sin_addr.s_addr = inet_addr("161.148.185.11");
-	r = connect(c, (struct sockaddr *) &saddr, sizeof(saddr));
-	if (r < 0) {
+	r = connect_rnet(&c);
+	if (r) {
 		fprintf(stderr, "error connecting to server: %s\n",
-			strerror(errno));
+			r == EAI_SYSTEM ? strerror(errno) : gai_strerror(r));
 		exit(1);
 	}
 	gnutls_transport_set_ptr(session, (gnutls_transport_ptr_t) c);
