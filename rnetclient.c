@@ -149,6 +149,22 @@ static int connect_rnet(int *c)
 	return 0;
 }
 
+static int handshake(int c)
+{
+	char buffer[16];
+	int r;
+	buffer[0] = 1;
+	write(c, buffer, 1);
+	write(c, "00000000000000", 14);
+	r = read(c, buffer, 1);
+	if (r != 1 && buffer[0] != 'E')
+		return -1;
+	r = read(c, buffer, 14);
+	if (r != 14)
+		return -1;
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	int c;
@@ -166,15 +182,10 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	gnutls_transport_set_ptr(session, (gnutls_transport_ptr_t) c);
-	buffer[0] = 1;
-	write(c, buffer, 1);
-	write(c, "00000000000000", 14);
-	r = read(c, buffer, 1);
-	if (r != 1 && buffer[0] != 'E')
+	r = handshake(c);
+	if (r < 0) {
 		exit(1);
-	r = read(c, buffer, 14);
-	if (r != 14)
-		exit(1);
+	}
 	if ((r = gnutls_handshake(session)) < 0)
 		fprintf(stderr, "error in handshake: %s\n",
 				gnutls_strerror(r));
