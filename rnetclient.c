@@ -27,6 +27,7 @@
 #include <netdb.h>
 #include <gnutls/gnutls.h>
 #include <zlib.h>
+#include "decfile.h"
 
 static void * get_creds(char *certfile)
 {
@@ -165,6 +166,12 @@ static int handshake(int c)
 	return 0;
 }
 
+static void usage(void)
+{
+	fprintf(stderr, "rnetclient [filename]\n");
+	exit(1);
+}
+
 int main(int argc, char **argv)
 {
 	int c;
@@ -172,8 +179,21 @@ int main(int argc, char **argv)
 	char buffer[2048];
 	char *out;
 	size_t olen;
+	struct rnet_decfile *decfile;
 	gnutls_session_t session;
+	
+	if (argc < 2) {
+		usage();
+	}
+
+	decfile = rnet_decfile_open(argv[1]);
+	if (!decfile) {
+		fprintf(stderr, "could not parse %s: %s\n", argv[1], strerror(errno));
+		exit(1);
+	}
+
 	gnutls_global_init();
+
 	session_new(&session);
 	r = connect_rnet(&c);
 	if (r) {
@@ -198,6 +218,10 @@ int main(int argc, char **argv)
 	while ((r = gnutls_record_recv(session, buffer, sizeof(buffer))) > 0)
 		write(1, buffer, r);
 	close(c);
+
+	rnet_decfile_close(decfile);
+
 	gnutls_global_deinit();
+
 	return 0;
 }
