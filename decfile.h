@@ -22,5 +22,6 @@
 struct rnet_decfile;
 struct rnet_decfile * rnet_decfile_open(char *filename);
 void rnet_decfile_close(struct rnet_decfile *decfile);
+char *rnet_decfile_get_header_field(struct rnet_decfile *decfile, char *field);
 
 #endif
