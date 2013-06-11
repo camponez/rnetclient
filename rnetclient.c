@@ -28,6 +28,8 @@
 #include <gnutls/gnutls.h>
 #include <zlib.h>
 #include "decfile.h"
+#include "rnet_message.h"
+#include "rnet_encode.h"
 
 static void * get_creds(char *certfile)
 {
@@ -180,6 +182,7 @@ int main(int argc, char **argv)
 	char *out;
 	size_t olen;
 	struct rnet_decfile *decfile;
+	struct rnet_message *message = NULL;
 	gnutls_session_t session;
 	
 	if (argc < 2) {
@@ -209,10 +212,12 @@ int main(int argc, char **argv)
 	if ((r = gnutls_handshake(session)) < 0)
 		fprintf(stderr, "error in handshake: %s\n",
 				gnutls_strerror(r));
-	r = read(0, buffer, sizeof(buffer));
-	deflateRecord(buffer, r, &out, &olen);
+
+	rnet_encode(decfile, &message);
+	deflateRecord(message->buffer, message->len, &out, &olen);
 	gnutls_record_send(session, out, olen);
 	free(out);
+
 	while ((r = gnutls_record_recv(session, buffer, sizeof(buffer))) > 0)
 		write(1, buffer, r);
 	close(c);
