@@ -209,8 +209,6 @@ int main(int argc, char **argv)
 	if ((r = gnutls_handshake(session)) < 0)
 		fprintf(stderr, "error in handshake: %s\n",
 				gnutls_strerror(r));
-	else
-		fprintf(stderr, "handshake ok\n");
 	r = read(0, buffer, sizeof(buffer));
 	deflateRecord(buffer, r, &out, &olen);
 	gnutls_record_send(session, out, olen);
