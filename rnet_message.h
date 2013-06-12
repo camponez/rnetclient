@@ -34,5 +34,6 @@ int rnet_message_add_u32(struct rnet_message *msg, char *key, uint32_t val);
 int rnet_message_add_ascii(struct rnet_message *msg, char *key, char *val);
 int rnet_message_add_u8(struct rnet_message *msg, char *key, uint8_t val);
 int rnet_message_add_u16(struct rnet_message *msg, char *key, uint16_t val);
+int rnet_message_add_u64(struct rnet_message *msg, char *key, uint64_t val);
 
 #endif
