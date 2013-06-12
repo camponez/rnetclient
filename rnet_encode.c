@@ -37,6 +37,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	char *ano;
 	char *exerc;
 	char *uf;
+	uint16_t versao_pgd;
 
 	*msg = rnet_message_new();
 	if (*msg == NULL) {
@@ -50,6 +51,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	ano = rnet_decfile_get_header_field(decfile, "ano");
 	exerc = rnet_decfile_get_header_field(decfile, "exerc");
 	uf = rnet_decfile_get_header_field(decfile, "uf");
+	versao_pgd = strtoul(rnet_decfile_get_header_field(decfile, "nr_versao"), NULL, 10);
 
 	(*msg)->buffer[0] = 0x40;
 	(*msg)->len = 1;
@@ -65,6 +67,13 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	r = rnet_message_add_u8(*msg, "ret", 0);
 	r = rnet_message_add_ascii(*msg, "uf", uf);
 	r = rnet_message_add_u8(*msg, "vrs_des_pa", 0);
+	r = rnet_message_add_u16(*msg, "versao_pgd", versao_pgd);
+	r = rnet_message_add_u8(*msg, "critica_validador", 0x06);
+	r = rnet_message_add_ascii(*msg, "ip_loc", "127.0.0.1");
+	r = rnet_message_add_ascii(*msg, "versao_java", "1.7.0_03-icedtea;OpenJDK Runtime Environment");
+	r = rnet_message_add_ascii(*msg, "origem", "JA2R");
+	r = rnet_message_add_ascii(*msg, "so", "GNU");
+	r = rnet_message_add_ascii(*msg, "cliente", "201104");
 
 	if (r < 0)
 		return r;
