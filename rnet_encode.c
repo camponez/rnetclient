@@ -29,12 +29,15 @@
 int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 {
 	int r;
+
 	uint32_t tp_arq;
 	uint32_t id_dec;
 	char *cpf;
 	char *codigo_recnet;
 	char *ano;
 	char *exerc;
+	char *uf;
+
 	*msg = rnet_message_new();
 	if (*msg == NULL) {
 		return -ENOMEM;
@@ -46,6 +49,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	cpf = rnet_decfile_get_header_field(decfile, "cpf");
 	ano = rnet_decfile_get_header_field(decfile, "ano");
 	exerc = rnet_decfile_get_header_field(decfile, "exerc");
+	uf = rnet_decfile_get_header_field(decfile, "uf");
 
 	(*msg)->buffer[0] = 0x40;
 	(*msg)->len = 1;
@@ -56,6 +60,12 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	r = rnet_message_add_ascii(*msg, "exercicio_pgd", exerc);
 	r = rnet_message_add_ascii(*msg, "ni", cpf);
 	r = rnet_message_add_ascii(*msg, "tipo_ni", "CPF");
+	r = rnet_message_add_u8(*msg, "num_ass", 0);
+	r = rnet_message_add_u32(*msg, "p_comp", 0);
+	r = rnet_message_add_u8(*msg, "ret", 0);
+	r = rnet_message_add_ascii(*msg, "uf", uf);
+	r = rnet_message_add_u8(*msg, "vrs_des_pa", 0);
+
 	if (r < 0)
 		return r;
 	return 0;
