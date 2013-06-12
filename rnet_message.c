@@ -67,6 +67,7 @@ static int add_field(struct rnet_message **message, char *key, int klen,
 	if ((msg->alen - msg->len) < (klen + vlen + 3)) {
 		if (rnet_message_expand(message, MAX(msg->len, klen + vlen + 3)))
 			return -ENOMEM;
+		msg = *message;
 	}
 	buffer = msg->buffer + msg->len;
 	if (klen > 0x7f || klen < 0)
