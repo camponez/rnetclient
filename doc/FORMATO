@@ -16,7 +16,7 @@ C: (6 bytes) + deflate(hash)
 		id_dec = 0xXX 0xXX 0xXX 0xXX (4) == "hash" da declaracao com 10 digitos decimais
 			exemplo: se "hash" == 1000000000, id_dec == 0x3b 0x9a 0xca 0x00
 		exercicio = "2012"
-		exercico_pgd = "20122013"
+		exercico_pgd = "2013"
 		hash_arq = 16 bytes
 		hash_trans = 16 bytes == hash_arq
 		ni = "00000000000" (CPF em ascii)
