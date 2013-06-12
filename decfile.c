@@ -24,6 +24,11 @@
 #include <errno.h>
 #include <unistd.h>
 #include "pmhash.h"
+#include "rnet_message.h"
+
+#ifndef MAX
+#define MAX(a,b) (a >= b) ? a : b
+#endif
 
 struct rnet_decfile {
 	char *filename;
@@ -31,6 +36,7 @@ struct rnet_decfile {
 	char **lines;
 	int lines_len;
 	struct pmhash *header;
+	struct rnet_message *message;
 };
 
 /*
@@ -67,6 +73,7 @@ static void decfile_release_lines(struct rnet_decfile *decfile)
 
 static char * get_header(struct rnet_decfile *decfile);
 static int parse_header(struct pmhash *hash, char *buffer);
+static int decfile_parse_file(struct rnet_decfile *decfile);
 
 static int decfile_parse_header(struct rnet_decfile *decfile)
 {
@@ -90,7 +97,7 @@ static int decfile_parse(struct rnet_decfile *decfile)
 		buffer = NULL;
 		len = 0;
 	}
-	if (!decfile_parse_header(decfile))
+	if (!decfile_parse_header(decfile) && !decfile_parse_file(decfile))
 		return 0;
 out:
 	decfile_release_lines(decfile);
@@ -106,6 +113,9 @@ struct rnet_decfile * rnet_decfile_open(char *filename)
 	decfile->header = pmhash_new();
 	if (!decfile->header)
 		goto out_header;
+	decfile->message = rnet_message_new();
+	if (!decfile->message)
+		goto out_message;
 	decfile->filename = strdup(filename);
 	if (!decfile->filename)
 		goto out_filename;
@@ -122,6 +132,8 @@ out_parse:
 out_file:
 	free(decfile->filename);
 out_filename:
+	rnet_message_del(decfile->message);
+out_message:
 	pmhash_del(decfile->header);
 out_header:
 	free(decfile);
@@ -260,4 +272,57 @@ out_val:
 char *rnet_decfile_get_header_field(struct rnet_decfile *decfile, char *field)
 {
 	return pmhash_get(decfile->header, field);
+}
+
+/* returns true if register is declaration and not a receipt */
+static int decfile_reg_is_dec(char *line)
+{
+	if (line[0] >= '0' && line[0] <= '9' &&
+	    line[1] >= '0' && line[1] <= '9')
+		return 1;
+	if (!strncmp(line, "IRPF    ", 8))
+		return 1;
+	if (!strncmp(line, "T9", 2))
+		return 1;
+	return 0;
+}
+
+/* strip a register from its control number and append it to message */
+static int append_stripped_reg_ctrl(struct rnet_message **message, char *line)
+{
+	size_t len;
+	struct rnet_message *msg = *message;
+	if (!decfile_reg_is_dec(line))
+		return 0;
+	len = strlen(line);
+	if (len < 12)
+		return -EINVAL;
+	if (msg->alen - msg->len < len) {
+		if (rnet_message_expand(message, MAX(msg->len, len)))
+			return -ENOMEM;
+		msg = *message;
+	}
+	memcpy(&msg->buffer[msg->len], line, len - 12);
+	msg->buffer[msg->len + len - 12] = '\r';
+	msg->buffer[msg->len + len - 11] = '\n';
+	msg->len += len - 10;
+	return 0;
+}
+
+static int decfile_parse_file(struct rnet_decfile *decfile)
+{
+	int i;
+	int r;
+	for (i = 0; i < decfile->lines_len; i++) {
+		r = append_stripped_reg_ctrl(&decfile->message,
+						decfile->lines[i]);
+		if (r)
+			return r;
+	}
+	return 0;
+}
+
+struct rnet_message * rnet_decfile_get_file(struct rnet_decfile *decfile)
+{
+	return decfile->message;
 }
