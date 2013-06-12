@@ -38,11 +38,14 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	char *exerc;
 	char *uf;
 	uint16_t versao_pgd;
+	uint64_t file_len;
 
 	*msg = rnet_message_new();
 	if (*msg == NULL) {
 		return -ENOMEM;
 	}
+
+	file_len = rnet_decfile_get_file(decfile)->len;
 
 	codigo_recnet = rnet_decfile_get_header_field(decfile, "codigo_recnet");
 	tp_arq = strtoul(codigo_recnet, NULL, 10);
@@ -65,6 +68,9 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	r = rnet_message_add_u8(msg, "num_ass", 0);
 	r = rnet_message_add_u32(msg, "p_comp", 0);
 	r = rnet_message_add_u8(msg, "ret", 0);
+	r = rnet_message_add_u64(msg, "tam_arq", file_len);
+	r = rnet_message_add_u64(msg, "tam_assinado", file_len);
+	r = rnet_message_add_u64(msg, "tam_trans", file_len);
 	r = rnet_message_add_ascii(msg, "uf", uf);
 	r = rnet_message_add_u8(msg, "vrs_des_pa", 0);
 	r = rnet_message_add_u16(msg, "versao_pgd", versao_pgd);
