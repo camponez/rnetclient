@@ -19,6 +19,7 @@
 #ifndef _RNET_MESSAGE_H
 #define _RNET_MESSAGE_H
 
+#include <sys/types.h>
 #include <stdint.h>
 
 struct rnet_message {
@@ -29,11 +30,12 @@ struct rnet_message {
 
 struct rnet_message * rnet_message_new(void);
 void rnet_message_del(struct rnet_message *message);
+int rnet_message_expand(struct rnet_message **message, size_t len);
 
-int rnet_message_add_u32(struct rnet_message *msg, char *key, uint32_t val);
-int rnet_message_add_ascii(struct rnet_message *msg, char *key, char *val);
-int rnet_message_add_u8(struct rnet_message *msg, char *key, uint8_t val);
-int rnet_message_add_u16(struct rnet_message *msg, char *key, uint16_t val);
-int rnet_message_add_u64(struct rnet_message *msg, char *key, uint64_t val);
+int rnet_message_add_u32(struct rnet_message **msg, char *key, uint32_t val);
+int rnet_message_add_ascii(struct rnet_message **msg, char *key, char *val);
+int rnet_message_add_u8(struct rnet_message **msg, char *key, uint8_t val);
+int rnet_message_add_u16(struct rnet_message **msg, char *key, uint16_t val);
+int rnet_message_add_u64(struct rnet_message **msg, char *key, uint64_t val);
 
 #endif

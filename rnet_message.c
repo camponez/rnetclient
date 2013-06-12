@@ -27,7 +27,7 @@
 #define MAX(a,b) (a >= b) ? a : b
 #endif
 
-static int rnet_message_expand(struct rnet_message **message, size_t len)
+int rnet_message_expand(struct rnet_message **message, size_t len)
 {
 	struct rnet_message *msg = *message;
 	struct rnet_message *nmsg;
@@ -58,12 +58,14 @@ void rnet_message_del(struct rnet_message *message)
 	free(message);
 }
 
-static int add_field(struct rnet_message *msg, char *key, int klen, char *val, int vlen)
+static int add_field(struct rnet_message **message, char *key, int klen,
+						char *val, int vlen)
 {
 	int n = 0;
 	char *buffer;
+	struct rnet_message *msg = *message;
 	if ((msg->alen - msg->len) < (klen + vlen + 3)) {
-		if (rnet_message_expand(&msg, MAX(msg->len, klen + vlen + 3)))
+		if (rnet_message_expand(message, MAX(msg->len, klen + vlen + 3)))
 			return -ENOMEM;
 	}
 	buffer = msg->buffer + msg->len;
@@ -95,29 +97,29 @@ static int add_field(struct rnet_message *msg, char *key, int klen, char *val, i
 	return n;
 }
 
-int rnet_message_add_u32(struct rnet_message *msg, char *key, uint32_t val)
+int rnet_message_add_u32(struct rnet_message **msg, char *key, uint32_t val)
 {
 	uint32_t nval = htonl(val);
 	return add_field(msg, key, strlen(key), (char *) &nval, sizeof(val));
 }
 
-int rnet_message_add_ascii(struct rnet_message *msg, char *key, char *val)
+int rnet_message_add_ascii(struct rnet_message **msg, char *key, char *val)
 {
 	return add_field(msg, key, strlen(key), val, strlen(val));
 }
 
-int rnet_message_add_u8(struct rnet_message *msg, char *key, uint8_t val)
+int rnet_message_add_u8(struct rnet_message **msg, char *key, uint8_t val)
 {
 	return add_field(msg, key, strlen(key), (char *) &val, sizeof(val));
 }
 
-int rnet_message_add_u16(struct rnet_message *msg, char *key, uint16_t val)
+int rnet_message_add_u16(struct rnet_message **msg, char *key, uint16_t val)
 {
 	uint16_t nval = htons(val);
 	return add_field(msg, key, strlen(key), (char *) &nval, sizeof(val));
 }
 
-int rnet_message_add_u64(struct rnet_message *msg, char *key, uint64_t val)
+int rnet_message_add_u64(struct rnet_message **msg, char *key, uint64_t val)
 {
 	uint64_t nval = htobe64(val);
 	return add_field(msg, key, strlen(key), (char *) &nval, sizeof(val));
