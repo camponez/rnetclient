@@ -110,3 +110,9 @@ int rnet_message_add_u8(struct rnet_message *msg, char *key, uint8_t val)
 {
 	return add_field(msg, key, strlen(key), (char *) &val, sizeof(val));
 }
+
+int rnet_message_add_u16(struct rnet_message *msg, char *key, uint16_t val)
+{
+	uint16_t nval = htons(val);
+	return add_field(msg, key, strlen(key), (char *) &nval, sizeof(val));
+}
