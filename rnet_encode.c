@@ -39,6 +39,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	char *uf;
 	uint16_t versao_pgd;
 	uint64_t file_len;
+	char *hash;
 
 	*msg = rnet_message_new();
 	if (*msg == NULL) {
@@ -46,6 +47,9 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	}
 
 	file_len = rnet_decfile_get_file(decfile)->len;
+	hash = rnet_decfile_get_file_hash(decfile);
+	if (!hash)
+		return -1;
 
 	codigo_recnet = rnet_decfile_get_header_field(decfile, "codigo_recnet");
 	tp_arq = strtoul(codigo_recnet, NULL, 10);
@@ -63,6 +67,8 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	r = rnet_message_add_u32(msg, "id_dec", id_dec);
 	r = rnet_message_add_ascii(msg, "exercicio", ano);
 	r = rnet_message_add_ascii(msg, "exercicio_pgd", exerc);
+	r = rnet_message_add_buffer(msg, "hash_arq", hash, 16);
+	r = rnet_message_add_buffer(msg, "hash_trans", hash, 16);
 	r = rnet_message_add_ascii(msg, "ni", cpf);
 	r = rnet_message_add_ascii(msg, "tipo_ni", "CPF");
 	r = rnet_message_add_u8(msg, "num_ass", 0);
@@ -83,6 +89,8 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	r = rnet_message_add_u32(msg, "tam_dados_val", 0);
 	r = rnet_message_add_u64(msg, "tam_dados_val_chave", 0);
 	r = rnet_message_add_u32(msg, "arquivos_restantes", 0);
+
+	free(hash);
 
 	if (r < 0)
 		return r;

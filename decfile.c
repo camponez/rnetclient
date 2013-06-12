@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <gcrypt.h>
 #include "pmhash.h"
 #include "rnet_message.h"
 
@@ -325,4 +326,19 @@ static int decfile_parse_file(struct rnet_decfile *decfile)
 struct rnet_message * rnet_decfile_get_file(struct rnet_decfile *decfile)
 {
 	return decfile->message;
+}
+
+char * rnet_decfile_get_file_hash(struct rnet_decfile *decfile)
+{
+	char *hash;
+	size_t len;
+	if (gcry_md_test_algo(GCRY_MD_MD5))
+		return NULL;
+	len = gcry_md_get_algo_dlen(GCRY_MD_MD5);
+	hash = malloc(len);
+	if (!hash)
+		return NULL;
+	gcry_md_hash_buffer(GCRY_MD_MD5, hash, decfile->message->buffer,
+					decfile->message->len);
+	return hash;
 }
