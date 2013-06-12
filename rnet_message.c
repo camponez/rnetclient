@@ -125,3 +125,9 @@ int rnet_message_add_u64(struct rnet_message **msg, char *key, uint64_t val)
 	uint64_t nval = htobe64(val);
 	return add_field(msg, key, strlen(key), (char *) &nval, sizeof(val));
 }
+
+int rnet_message_add_buffer(struct rnet_message **msg, char *key,
+				char *buffer, size_t len)
+{
+	return add_field(msg, key, strlen(key), buffer, len);
+}
