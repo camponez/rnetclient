@@ -105,3 +105,8 @@ int rnet_message_add_ascii(struct rnet_message *msg, char *key, char *val)
 {
 	return add_field(msg, key, strlen(key), val, strlen(val));
 }
+
+int rnet_message_add_u8(struct rnet_message *msg, char *key, uint8_t val)
+{
+	return add_field(msg, key, strlen(key), (char *) val, sizeof(val));
+}
