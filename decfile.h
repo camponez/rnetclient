@@ -26,6 +26,7 @@ struct rnet_decfile * rnet_decfile_open(char *filename);
 void rnet_decfile_close(struct rnet_decfile *decfile);
 char *rnet_decfile_get_header_field(struct rnet_decfile *decfile, char *field);
 
+char * rnet_decfile_get_header(struct rnet_decfile *decfile);
 struct rnet_message * rnet_decfile_get_file(struct rnet_decfile *decfile);
 char * rnet_decfile_get_file_hash(struct rnet_decfile *decfile);
 

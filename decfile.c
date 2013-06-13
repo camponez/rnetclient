@@ -342,3 +342,8 @@ char * rnet_decfile_get_file_hash(struct rnet_decfile *decfile)
 					decfile->message->len);
 	return hash;
 }
+
+char * rnet_decfile_get_header(struct rnet_decfile *decfile)
+{
+	return get_header(decfile);
+}

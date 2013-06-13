@@ -40,6 +40,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	uint16_t versao_pgd;
 	uint64_t file_len;
 	char *hash;
+	char *header;
 
 	*msg = rnet_message_new();
 	if (*msg == NULL) {
@@ -50,6 +51,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	hash = rnet_decfile_get_file_hash(decfile);
 	if (!hash)
 		return -1;
+	header = rnet_decfile_get_header(decfile);
 
 	codigo_recnet = rnet_decfile_get_header_field(decfile, "codigo_recnet");
 	tp_arq = strtoul(codigo_recnet, NULL, 10);
@@ -86,6 +88,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	r = rnet_message_add_ascii(msg, "origem", "JA2R");
 	r = rnet_message_add_ascii(msg, "so", "GNU");
 	r = rnet_message_add_ascii(msg, "cliente", "201104");
+	r = rnet_message_add_buffer(msg, "dados_val", header + 111, 750 - 111);
 	r = rnet_message_add_u32(msg, "tam_dados_val", 0);
 	r = rnet_message_add_u32(msg, "tam_dados_val_chave", 0);
 	r = rnet_message_add_u32(msg, "arquivos_restantes", 0);
