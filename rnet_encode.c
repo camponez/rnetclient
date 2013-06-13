@@ -87,7 +87,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	r = rnet_message_add_ascii(msg, "so", "GNU");
 	r = rnet_message_add_ascii(msg, "cliente", "201104");
 	r = rnet_message_add_u32(msg, "tam_dados_val", 0);
-	r = rnet_message_add_u64(msg, "tam_dados_val_chave", 0);
+	r = rnet_message_add_u32(msg, "tam_dados_val_chave", 0);
 	r = rnet_message_add_u32(msg, "arquivos_restantes", 0);
 
 	free(hash);

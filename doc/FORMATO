@@ -39,7 +39,7 @@ C: (6 bytes) + deflate(hash)
 		cliente = "201104" (será a versão do receitanet?)
 		dados_val = parte do cabeçalho do DEC (desce in_cert até vr_totpagamentos) bytes 112 a 750
 		tam_dados_val = 0x00 0x00 0x00 0x00 (4 bytes)
-		tam_dados_val_chave = 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 (8 bytes)
+		tam_dados_val_chave = 0x00 0x00 0x00 0x00 (4 bytes)
 		arquivos_restantes = 0x00 0x00 0x00 0x00 (4 bytes)
 S: (6 bytes) + deflate(hash)
 	header: 0x01 0xII 0xII 0xOO 0xOO 0x01, II é o tamanho da entrada, OO é o tamanho da saída do deflate
