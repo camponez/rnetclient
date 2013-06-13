@@ -1,6 +1,7 @@
 Immediately:
-* Support compressed message packet.
-* Parse DEC file enough to send it.
 * Parse responses.
 * Save exchanged messages as debug data.
 * Save REC file.
+* Handle failures and invalid input properly.
+* Allow some user settings.
+* Verify certificate.
