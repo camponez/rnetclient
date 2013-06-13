@@ -70,7 +70,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	r = rnet_message_add_buffer(msg, "hash_arq", hash, 16);
 	r = rnet_message_add_buffer(msg, "hash_trans", hash, 16);
 	r = rnet_message_add_ascii(msg, "ni", cpf);
-	r = rnet_message_add_ascii(msg, "tipo_ni", "CPF");
+	r = rnet_message_add_ascii(msg, "tp_ni", "CPF");
 	r = rnet_message_add_u8(msg, "num_ass", 0);
 	r = rnet_message_add_u32(msg, "p_comp", 0);
 	r = rnet_message_add_u8(msg, "ret", 0);

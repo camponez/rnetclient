@@ -20,7 +20,7 @@ C: (6 bytes) + deflate(hash)
 		hash_arq = 16 bytes
 		hash_trans = 16 bytes == hash_arq
 		ni = "00000000000" (CPF em ascii)
-		tipo_ni = "CPF"
+		tp_ni = "CPF"
 		num_ass = 0x00 (assinatura e-CPF?)
 		p_comp = 0x00 0x00 0x00 0x00
 		ret = 0x00
