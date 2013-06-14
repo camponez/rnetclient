@@ -208,6 +208,55 @@ static int rnet_recv(gnutls_session_t session, struct rnet_message **message)
 	return 0;
 }
 
+static void save_rec_file(char *cpf, char *buffer, int len)
+{
+	int fd;
+	char *filename;
+	char *home, *tmpdir;
+	mode_t mask;
+	size_t fnlen;
+	int r;
+	home = getenv("HOME");
+	if (!home) {
+		tmpdir = getenv("TMPDIR");
+		if (!tmpdir)
+			tmpdir = "/tmp";
+		home = tmpdir;
+	}
+	fnlen = strlen(home) + strlen(cpf) + 13;
+	filename = malloc(fnlen);
+	snprintf(filename, fnlen, "%s/%s.REC.XXXXXX", home, cpf);
+	mask = umask(0177);
+	fd = mkstemp(filename);
+	if (fd < 0) {
+		fprintf(stderr, "Could not create receipt file: %s\n",
+						strerror(errno));
+		goto out;
+	}
+	r = write(fd, buffer, len);
+	if (r != len) {
+		fprintf(stderr, "Could not write to receipt file%s%s\n",
+			r < 0 ? ": " : ".",
+			r < 0 ? strerror(errno) : "");
+		goto out;
+	}
+	fprintf(stderr, "Wrote the receipt to %s.\n", filename);
+out:
+	close(fd);
+	free(filename);
+	umask(mask);
+}
+
+static void handle_response_already_found(char *cpf, struct rnet_message *message)
+{
+	char *value;
+	int vlen;
+	if (!rnet_message_parse(message, "texto", &value, &vlen))
+		fprintf(stderr, "%.*s\n", vlen, value);
+	if (!rnet_message_parse(message, "arquivo", &value, &vlen))
+		save_rec_file(cpf, value, vlen);
+}
+
 int main(int argc, char **argv)
 {
 	int c;
@@ -216,6 +265,7 @@ int main(int argc, char **argv)
 	struct rnet_message *message = NULL;
 	gnutls_session_t session;
 	int finish = 0;
+	char *cpf;
 	
 	if (argc < 2) {
 		usage();
@@ -226,6 +276,8 @@ int main(int argc, char **argv)
 		fprintf(stderr, "could not parse %s: %s\n", argv[1], strerror(errno));
 		exit(1);
 	}
+
+	cpf = rnet_decfile_get_header_field(decfile, "cpf");
 
 	gnutls_global_init();
 
@@ -255,15 +307,17 @@ int main(int argc, char **argv)
 		fprintf(stderr, "error when receiving response\n");
 		goto out;
 	}
-	write(1, message->buffer, message->len);
 	switch (message->buffer[0]) {
 	case 1: /* go ahead */
 		break;
 	case 3: /* error */
 		finish = 1;
 		break;
-	case 2:
 	case 4:
+		handle_response_already_found(cpf, message);
+		finish = 1;
+		break;
+	case 2:
 	case 5:
 		finish = 1;
 		break;
@@ -282,7 +336,6 @@ int main(int argc, char **argv)
 		fprintf(stderr, "error when receiving response\n");
 		goto out;
 	}
-	write(1, message->buffer, message->len);
 	switch (message->buffer[0]) {
 	case 3: /* error */
 		finish = 1;
