@@ -94,7 +94,7 @@ static int inflateRecord(char *buffer, size_t len, char **out, size_t *olen)
 	zstrm.opaque = Z_NULL;
 	if ((r = inflateInit(&zstrm)) != Z_OK)
 		return -1;
-	*olen = (buffer[3] << 8 & buffer[4]);
+	*olen = (buffer[3] << 8 | buffer[4]);
 	*out = malloc(*olen);
 	if (!out) {
 		inflateEnd(&zstrm);
