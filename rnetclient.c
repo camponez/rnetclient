@@ -215,6 +215,7 @@ int main(int argc, char **argv)
 	struct rnet_decfile *decfile;
 	struct rnet_message *message = NULL;
 	gnutls_session_t session;
+	int finish = 0;
 	
 	if (argc < 2) {
 		usage();
@@ -249,10 +250,52 @@ int main(int argc, char **argv)
 	rnet_message_del(message);
 
 	message = NULL;
-	rnet_recv(session, &message);
+	r = rnet_recv(session, &message);
+	if (r || !message || message->len == 0) {
+		fprintf(stderr, "error when receiving response\n");
+		goto out;
+	}
 	write(1, message->buffer, message->len);
+	switch (message->buffer[0]) {
+	case 1: /* go ahead */
+		break;
+	case 3: /* error */
+		finish = 1;
+		break;
+	case 2:
+	case 4:
+	case 5:
+		finish = 1;
+		break;
+	}
 	rnet_message_del(message);
 
+	if (finish)
+		goto out;
+
+	message = rnet_decfile_get_file(decfile);
+	rnet_send(session, message->buffer, message->len);
+
+	message = NULL;
+	r = rnet_recv(session, &message);
+	if (r || !message || message->len == 0) {
+		fprintf(stderr, "error when receiving response\n");
+		goto out;
+	}
+	write(1, message->buffer, message->len);
+	switch (message->buffer[0]) {
+	case 3: /* error */
+		finish = 1;
+		break;
+	case 2:
+	case 4:
+	case 5:
+	case 1:
+		finish = 1;
+		break;
+	}
+	
+out:
 	gnutls_bye(session, GNUTLS_SHUT_RDWR);
 	close(c);
 	rnet_decfile_close(decfile);
