@@ -1,7 +1,5 @@
 Immediately:
-* Parse responses.
 * Save exchanged messages as debug data.
-* Save REC file.
 * Handle failures and invalid input properly.
 * Allow some user settings.
 * Verify certificate.
