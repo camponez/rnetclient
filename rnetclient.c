@@ -257,6 +257,15 @@ static void handle_response_already_found(char *cpf, struct rnet_message *messag
 		save_rec_file(cpf, value, vlen);
 }
 
+static void handle_response_error(struct rnet_message *message)
+{
+	char *value;
+	int vlen;
+	if (!rnet_message_parse(message, "texto", &value, &vlen))
+		fprintf(stderr, "%.*s\n", vlen, value);
+	fprintf(stderr, "Error transmiting DEC file.\n");
+}
+
 int main(int argc, char **argv)
 {
 	int c;
@@ -311,6 +320,7 @@ int main(int argc, char **argv)
 	case 1: /* go ahead */
 		break;
 	case 3: /* error */
+		handle_response_error(message);
 		finish = 1;
 		break;
 	case 4:
@@ -338,13 +348,12 @@ int main(int argc, char **argv)
 	}
 	switch (message->buffer[0]) {
 	case 3: /* error */
-		finish = 1;
+		handle_response_error(message);
 		break;
 	case 2:
 	case 4:
 	case 5:
 	case 1:
-		finish = 1;
 		break;
 	}
 	
