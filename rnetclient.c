@@ -174,13 +174,44 @@ static void usage(void)
 	exit(1);
 }
 
+static int rnet_send(gnutls_session_t session, char *buffer, size_t len)
+{
+	char *out;
+	size_t olen;
+	deflateRecord(buffer, len, &out, &olen);
+	gnutls_record_send(session, out, olen);
+	free(out);
+	return 0;
+}
+
+static int rnet_recv(gnutls_session_t session, struct rnet_message **message)
+{
+	char *out;
+	size_t olen;
+	int r;
+	char *buffer;
+	size_t len;
+	rnet_message_expand(message, 6);
+	buffer = (*message)->buffer;
+	r = gnutls_record_recv(session, buffer, 6);
+	len = (buffer[1] << 8 | buffer[2]);
+	rnet_message_expand(message, len);
+	buffer = (*message)->buffer + 6;
+	r = gnutls_record_recv(session, buffer, len);
+	inflateRecord(buffer - 6, len + 6, &out, &olen);
+	rnet_message_del(*message);
+	*message = NULL;
+	rnet_message_expand(message, olen);
+	memcpy((*message)->buffer, out, olen);
+	(*message)->len = olen;
+	free(out);
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	int c;
 	int r;
-	char buffer[2048];
-	char *out;
-	size_t olen;
 	struct rnet_decfile *decfile;
 	struct rnet_message *message = NULL;
 	gnutls_session_t session;
@@ -214,16 +245,17 @@ int main(int argc, char **argv)
 				gnutls_strerror(r));
 
 	rnet_encode(decfile, &message);
-	deflateRecord(message->buffer, message->len, &out, &olen);
-	gnutls_record_send(session, out, olen);
-	free(out);
+	rnet_send(session, message->buffer, message->len);
+	rnet_message_del(message);
 
-	while ((r = gnutls_record_recv(session, buffer, sizeof(buffer))) > 0)
-		write(1, buffer, r);
+	message = NULL;
+	rnet_recv(session, &message);
+	write(1, message->buffer, message->len);
+	rnet_message_del(message);
+
+	gnutls_bye(session, GNUTLS_SHUT_RDWR);
 	close(c);
-
 	rnet_decfile_close(decfile);
-
 	gnutls_global_deinit();
 
 	return 0;
