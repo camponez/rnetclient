@@ -247,7 +247,7 @@ out:
 	umask(mask);
 }
 
-static void handle_response_already_found(char *cpf, struct rnet_message *message)
+static void handle_response_text_and_file(char *cpf, struct rnet_message *message)
 {
 	char *value;
 	int vlen;
@@ -255,6 +255,11 @@ static void handle_response_already_found(char *cpf, struct rnet_message *messag
 		fprintf(stderr, "%.*s\n", vlen, value);
 	if (!rnet_message_parse(message, "arquivo", &value, &vlen))
 		save_rec_file(cpf, value, vlen);
+}
+
+static void handle_response_already_found(char *cpf, struct rnet_message *message)
+{
+	handle_response_text_and_file(cpf, message);
 }
 
 static void handle_response_error(struct rnet_message *message)
@@ -318,6 +323,7 @@ int main(int argc, char **argv)
 	}
 	switch (message->buffer[0]) {
 	case 1: /* go ahead */
+		handle_response_text_and_file(cpf, message);
 		break;
 	case 3: /* error */
 		handle_response_error(message);
@@ -329,6 +335,7 @@ int main(int argc, char **argv)
 		break;
 	case 2:
 	case 5:
+		handle_response_text_and_file(cpf, message);
 		finish = 1;
 		break;
 	}
@@ -354,6 +361,7 @@ int main(int argc, char **argv)
 	case 4:
 	case 5:
 	case 1:
+		handle_response_text_and_file(cpf, message);
 		break;
 	}
 	
