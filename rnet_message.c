@@ -131,3 +131,39 @@ int rnet_message_add_buffer(struct rnet_message **msg, char *key,
 {
 	return add_field(msg, key, strlen(key), buffer, len);
 }
+
+int rnet_message_parse(struct rnet_message *msg, char *skey,
+				char** value, int *vlen)
+{
+	char * buffer = msg->buffer;
+	size_t len = msg->len;
+	int i = 0;
+	unsigned int j;
+	int b;
+	char *key;
+	int klen;
+	char *kcopy;
+	/* skip first byte */
+	i++;
+	while (i < len) {
+		j = buffer[i];
+		b = j & 0x80;
+		if (b)
+			;
+		j = j & 0x7f;
+		i++;
+		key = buffer + i;
+		klen = j;
+		i += j;
+		j = buffer[i];
+		i++;
+		if (b)
+			j = j << 8 | buffer[i++];
+		*value = buffer + i;
+		*vlen = j;
+		i += j;
+		if (strlen(skey) == klen && !strncasecmp(key, skey, klen))
+			return 0;
+	}
+	return 1;
+}

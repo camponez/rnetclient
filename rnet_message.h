@@ -40,4 +40,7 @@ int rnet_message_add_u64(struct rnet_message **msg, char *key, uint64_t val);
 int rnet_message_add_buffer(struct rnet_message **msg, char *key,
 				char *buffer, size_t len);
 
+int rnet_message_parse(struct rnet_message *msg, char *skey,
+				char** value, int *vlen);
+
 #endif
