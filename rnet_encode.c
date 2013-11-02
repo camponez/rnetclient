@@ -41,6 +41,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	uint64_t file_len;
 	char *hash;
 	char *header;
+	uint8_t ret;
 
 	*msg = rnet_message_new();
 	if (*msg == NULL) {
@@ -61,6 +62,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	exerc = rnet_decfile_get_header_field(decfile, "exerc");
 	uf = rnet_decfile_get_header_field(decfile, "uf");
 	versao_pgd = strtoul(rnet_decfile_get_header_field(decfile, "nr_versao"), NULL, 10);
+	ret = strtoul(rnet_decfile_get_header_field(decfile, "in_ret"), NULL, 10);
 
 	(*msg)->buffer[0] = 0x40;
 	(*msg)->len = 1;
@@ -75,7 +77,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	r = rnet_message_add_ascii(msg, "tp_ni", "CPF");
 	r = rnet_message_add_u8(msg, "num_ass", 0);
 	r = rnet_message_add_u32(msg, "p_comp", 0);
-	r = rnet_message_add_u8(msg, "ret", 0);
+	r = rnet_message_add_u8(msg, "ret", ret);
 	r = rnet_message_add_u64(msg, "tam_arq", file_len);
 	r = rnet_message_add_u64(msg, "tam_assinado", file_len);
 	r = rnet_message_add_u64(msg, "tam_trans", file_len);
