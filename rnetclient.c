@@ -194,17 +194,26 @@ static int rnet_recv(gnutls_session_t session, struct rnet_message **message)
 	rnet_message_expand(message, 6);
 	buffer = (*message)->buffer;
 	r = gnutls_record_recv(session, buffer, 6);
-	len = (buffer[1] << 8 | buffer[2]);
-	rnet_message_expand(message, len);
-	buffer = (*message)->buffer + 6;
-	r = gnutls_record_recv(session, buffer, len);
-	inflateRecord(buffer - 6, len + 6, &out, &olen);
-	rnet_message_del(*message);
-	*message = NULL;
-	rnet_message_expand(message, olen);
-	memcpy((*message)->buffer, out, olen);
-	(*message)->len = olen;
-	free(out);
+	if (buffer[0] == 0x01) {
+		len = (buffer[1] << 8 | buffer[2]);
+		rnet_message_expand(message, len);
+		buffer = (*message)->buffer + 6;
+		r = gnutls_record_recv(session, buffer, len);
+		inflateRecord(buffer - 6, len + 6, &out, &olen);
+		rnet_message_del(*message);
+		*message = NULL;
+		rnet_message_expand(message, olen);
+		memcpy((*message)->buffer, out, olen);
+		(*message)->len = olen;
+		free(out);
+	} else {
+		len = (buffer[1] << 8 | buffer[2]);
+		rnet_message_expand(message, len - 1);
+		buffer = (*message)->buffer + 6;
+		r = gnutls_record_recv(session, buffer, len - 1);
+		(*message)->len = len + 4;
+		rnet_message_strip(*message, 4);
+	}
 	return 0;
 }
 
