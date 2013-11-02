@@ -58,6 +58,15 @@ void rnet_message_del(struct rnet_message *message)
 	free(message);
 }
 
+int rnet_message_strip(struct rnet_message *message, size_t len)
+{
+	if (len > message->len)
+		return -1;
+	message->len -= len;
+	memmove(message->buffer, message->buffer + len, message->len);
+	return 0;
+}
+
 static int add_field(struct rnet_message **message, char *key, int klen,
 						char *val, int vlen)
 {

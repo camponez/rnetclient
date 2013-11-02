@@ -31,6 +31,7 @@ struct rnet_message {
 struct rnet_message * rnet_message_new(void);
 void rnet_message_del(struct rnet_message *message);
 int rnet_message_expand(struct rnet_message **message, size_t len);
+int rnet_message_strip(struct rnet_message *message, size_t len);
 
 int rnet_message_add_u32(struct rnet_message **msg, char *key, uint32_t val);
 int rnet_message_add_ascii(struct rnet_message **msg, char *key, char *val);
