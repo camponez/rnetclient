@@ -74,10 +74,10 @@ static int deflateRecord(char *buffer, size_t len, char **out, size_t *olen)
 		free(*out);
 		return -1;
 	}
-	*olen = zstrm.avail_out + 6;
+	*olen = zstrm.total_out + 6;
 	(*out)[0] = 0x1;
-	(*out)[1] = (zstrm.avail_out >> 8);
-	(*out)[2] = (zstrm.avail_out & 0xff);
+	(*out)[1] = (zstrm.total_out >> 8);
+	(*out)[2] = (zstrm.total_out & 0xff);
 	(*out)[3] = (len >> 8);
 	(*out)[4] = (len & 0xff);
 	(*out)[5] = 0x1;
