@@ -49,7 +49,7 @@ static void session_new(gnutls_session_t *session)
 	gnutls_credentials_set(*session, GNUTLS_CRD_CERTIFICATE, cred);
 }
 
-static int deflateRecord(char *buffer, size_t len, char **out, size_t *olen)
+static int deflateRecord(char *buffer, size_t len, char **out, size_t *olen, int header)
 {
 	z_stream zstrm;
 	int r;
@@ -80,7 +80,7 @@ static int deflateRecord(char *buffer, size_t len, char **out, size_t *olen)
 	(*out)[2] = (zstrm.total_out & 0xff);
 	(*out)[3] = (len >> 8);
 	(*out)[4] = (len & 0xff);
-	(*out)[5] = 0x1;
+	(*out)[5] = header ? 0x01 : 0x0;
 	deflateEnd(&zstrm);
 	return 0;
 }
@@ -174,11 +174,11 @@ static void usage(void)
 	exit(1);
 }
 
-static int rnet_send(gnutls_session_t session, char *buffer, size_t len)
+static int rnet_send(gnutls_session_t session, char *buffer, size_t len, int header)
 {
 	char *out;
 	size_t olen;
-	deflateRecord(buffer, len, &out, &olen);
+	deflateRecord(buffer, len, &out, &olen, header);
 	gnutls_record_send(session, out, olen);
 	free(out);
 	return 0;
@@ -321,7 +321,7 @@ int main(int argc, char **argv)
 				gnutls_strerror(r));
 
 	rnet_encode(decfile, &message);
-	rnet_send(session, message->buffer, message->len);
+	rnet_send(session, message->buffer, message->len, 1);
 	rnet_message_del(message);
 
 	message = NULL;
@@ -354,7 +354,7 @@ int main(int argc, char **argv)
 		goto out;
 
 	message = rnet_decfile_get_file(decfile);
-	rnet_send(session, message->buffer, message->len);
+	rnet_send(session, message->buffer, message->len, 0);
 
 	message = NULL;
 	r = rnet_recv(session, &message);

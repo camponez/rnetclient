@@ -51,6 +51,6 @@ S: (6 bytes) + deflate(hash)
 			chave TEXTO: "XXXX.Erro xxxxxxxx", onde XXXX é o código de erro
 			chaves *ARQ*
 C: (6 bytes) + deflate(hash)
-	header: 0x01 0xII 0xII 0xOO 0xOO 0x01, II é o tamanho da entrada, OO é o tamanho da saída do deflate
+	header: 0x01 0xII 0xII 0xOO 0xOO 0x00, II é o tamanho da entrada, OO é o tamanho da saída do deflate
 	conteúdo: arquivo DEC, com apenas os registros de declaração, ou seja, excluídos os registros de recibo, removido o número de controle (últimos 10 bytes) de todos os registros
 	O tamanho e o hash da mensagem anterior do cliente são o tamanho e o hash MD5 do conteúdo desta transmissão
