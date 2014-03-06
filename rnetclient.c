@@ -311,7 +311,7 @@ int main(int argc, char **argv)
 			r == EAI_SYSTEM ? strerror(errno) : gai_strerror(r));
 		exit(1);
 	}
-	gnutls_transport_set_ptr(session, (gnutls_transport_ptr_t) c);
+	gnutls_transport_set_ptr(session, (gnutls_transport_ptr_t)(intptr_t) c);
 	r = handshake(c);
 	if (r < 0) {
 		exit(1);
