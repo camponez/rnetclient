@@ -60,7 +60,7 @@ static int append_line(struct rnet_decfile *decfile, char *line)
 	return 0;
 out:
 	decfile->lines_len -= 1;
-	return -1;
+	return -ENOMEM;
 }
 
 static void decfile_release_lines(struct rnet_decfile *decfile)
@@ -80,7 +80,7 @@ static int decfile_parse_header(struct rnet_decfile *decfile)
 {
 	char *buffer = get_header(decfile);
 	if (!buffer || strlen(buffer) != 765)
-		return 1;
+		return -EINVAL;
 	return parse_header(decfile->header, buffer);
 }
 
@@ -98,16 +98,17 @@ static int decfile_parse(struct rnet_decfile *decfile)
 		buffer = NULL;
 		len = 0;
 	}
-	if (!decfile_parse_header(decfile) && !decfile_parse_file(decfile))
+	if (!(r = decfile_parse_header(decfile)) && !(r = decfile_parse_file(decfile)))
 		return 0;
 out:
 	decfile_release_lines(decfile);
-	return -1;
+	return r;
 }
 
 struct rnet_decfile * rnet_decfile_open(char *filename)
 {
 	struct rnet_decfile *decfile;
+	int r = -ENOMEM;
 	decfile = malloc(sizeof(*decfile));
 	if (!decfile)
 		return NULL;
@@ -125,7 +126,7 @@ struct rnet_decfile * rnet_decfile_open(char *filename)
 		goto out_file;
 	decfile->lines_len = 0;
 	decfile->lines = NULL;
-	if (decfile_parse(decfile))
+	if ((r = decfile_parse(decfile)))
 		goto out_parse;
 	return decfile;
 out_parse:
@@ -138,6 +139,7 @@ out_message:
 	pmhash_del(decfile->header);
 out_header:
 	free(decfile);
+	errno = -r;
 	return NULL;
 }
 
