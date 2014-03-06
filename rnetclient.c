@@ -31,6 +31,10 @@
 #include "rnet_message.h"
 #include "rnet_encode.h"
 
+static size_t chars2len (unsigned char buf[2]) {
+	return (buf[0] << 8 | buf[1]);
+}
+
 static void * get_creds(char *certfile)
 {
 	static gnutls_certificate_credentials_t cred;
@@ -94,7 +98,7 @@ static int inflateRecord(char *buffer, size_t len, char **out, size_t *olen)
 	zstrm.opaque = Z_NULL;
 	if ((r = inflateInit(&zstrm)) != Z_OK)
 		return -1;
-	*olen = (buffer[3] << 8 | buffer[4]);
+	*olen = chars2len(buffer+3);
 	*out = malloc(*olen);
 	if (!out) {
 		inflateEnd(&zstrm);
@@ -195,7 +199,7 @@ static int rnet_recv(gnutls_session_t session, struct rnet_message **message)
 	buffer = (*message)->buffer;
 	r = gnutls_record_recv(session, buffer, 6);
 	if (buffer[0] == 0x01) {
-		len = (buffer[1] << 8 | buffer[2]);
+		len = chars2len(buffer+1);
 		rnet_message_expand(message, len);
 		buffer = (*message)->buffer + 6;
 		r = gnutls_record_recv(session, buffer, len);
@@ -207,7 +211,7 @@ static int rnet_recv(gnutls_session_t session, struct rnet_message **message)
 		(*message)->len = olen;
 		free(out);
 	} else {
-		len = (buffer[1] << 8 | buffer[2]);
+		len = chars2len(buffer+1);
 		rnet_message_expand(message, len - 1);
 		buffer = (*message)->buffer + 6;
 		r = gnutls_record_recv(session, buffer, len - 1);
