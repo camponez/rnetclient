@@ -1,4 +1,4 @@
-AC_INIT(rnetclient,0.1.1,cascardo@minaslivre.org)
+AC_INIT(rnetclient,2014.0,cascardo@minaslivre.org)
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME,AC_PACKAGE_VERSION)
 AC_PROG_CC
 AC_PROG_INSTALL
