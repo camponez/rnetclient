@@ -430,13 +430,15 @@ static int append_stripped_reg_ctrl(struct rnet_message **message, char *line)
 {
 	size_t len;
 	struct rnet_message *msg = *message;
+	int growth;
 	if (!decfile_reg_is_dec(line))
 		return 0;
 	len = strlen(line);
 	if (len < 12)
 		return -EINVAL;
-	if (msg->alen - msg->len < len) {
-		if (rnet_message_expand(message, MAX(msg->len, len)))
+	growth = msg->len + len - 10 - msg->alen;
+	if (growth > 0) {
+		if (rnet_message_expand(message, growth))
 			return -ENOMEM;
 		msg = *message;
 	}
