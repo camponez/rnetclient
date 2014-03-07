@@ -21,6 +21,9 @@
 
 #include "rnet_message.h"
 
+#define RNET_HEADER_SIZE_2013 765
+#define RNET_HEADER_SIZE_2014 793
+
 struct rnet_decfile;
 struct rnet_decfile * rnet_decfile_open(char *filename);
 void rnet_decfile_close(struct rnet_decfile *decfile);

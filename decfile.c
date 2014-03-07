@@ -83,9 +83,9 @@ static int decfile_parse_header(struct rnet_decfile *decfile)
 	if (!buffer)
 		return -EINVAL;
 	switch (strlen(buffer)) {
-	case 765:
+	case RNET_HEADER_SIZE_2013:
 		return parse_header_2013(decfile->header, buffer);
-	case 793:
+	case RNET_HEADER_SIZE_2014:
 		return parse_header_2014(decfile->header, buffer);
 	default:
 		return -EINVAL;
