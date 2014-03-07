@@ -26,6 +26,11 @@
 #include "rnet_message.h"
 #include "decfile.h"
 
+#define RNET_HEADER_START_2013 111
+#define RNET_HEADER_END_2013 (RNET_HEADER_SIZE_2013 - 15)
+#define RNET_HEADER_START_2014 111
+#define RNET_HEADER_END_2014 (RNET_HEADER_SIZE_2014 - 15)
+
 int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 {
 	int r;
@@ -42,6 +47,8 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	char *hash;
 	char *header;
 	uint8_t ret;
+
+	size_t header_start, header_end;
 
 	*msg = rnet_message_new();
 	if (*msg == NULL) {
@@ -63,6 +70,16 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	uf = rnet_decfile_get_header_field(decfile, "uf");
 	versao_pgd = strtoul(rnet_decfile_get_header_field(decfile, "nr_versao"), NULL, 10);
 	ret = strtoul(rnet_decfile_get_header_field(decfile, "in_ret"), NULL, 10);
+
+	if (!strcmp(ano, "2013")) {
+		header_start = RNET_HEADER_START_2013;
+		header_end = RNET_HEADER_END_2013;
+	} else if (!strcmp(ano, "2014")) {
+		header_start = RNET_HEADER_START_2014;
+		header_end = RNET_HEADER_END_2014;
+	} else {
+		return -EINVAL;
+	}
 
 	(*msg)->buffer[0] = 0x40;
 	(*msg)->len = 1;
@@ -90,7 +107,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	r = rnet_message_add_ascii(msg, "origem", "JA2R");
 	r = rnet_message_add_ascii(msg, "so", "GNU");
 	r = rnet_message_add_ascii(msg, "cliente", "201104");
-	r = rnet_message_add_buffer(msg, "dados_val", header + 111, 750 - 111);
+	r = rnet_message_add_buffer(msg, "dados_val", header + header_start, header_end - header_start);
 	r = rnet_message_add_u32(msg, "tam_dados_val", 0);
 	r = rnet_message_add_u32(msg, "tam_dados_val_chave", 0);
 	r = rnet_message_add_u32(msg, "arquivos_restantes", 0);
