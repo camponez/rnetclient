@@ -35,7 +35,7 @@ C: (6 bytes) + deflate(hash)
 		versao_java = "1.5.0-gij;Free Software rnetclient pretending to be GNU Interpreter for Java" (versão do Java em ASCII; o ReceitaNet concatena as propriedades java.version e java.runtime.name, com ";" entre elas)
 		origem = "JA2R" (melhor repetir!)
 		so = "Linux"
-		cliente = "201104" (será a versão do receitanet?)
+		cliente = "201105" (identificador de versão do receitanet)
 		dados_val = parte do cabeçalho do DEC (desce in_cert até vr_totpagamentos) bytes 112 a 750
 		tam_dados_val = 0x00 0x00 0x00 0x00 (4 bytes)
 		tam_dados_val_chave = 0x00 0x00 0x00 0x00 (4 bytes)

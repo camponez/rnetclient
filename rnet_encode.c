@@ -106,7 +106,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	r = rnet_message_add_ascii(msg, "versao_java", "1.5.0-gij;Free Software rnetclient pretending to be GNU Interpreter for Java");
 	r = rnet_message_add_ascii(msg, "origem", "JA2R");
 	r = rnet_message_add_ascii(msg, "so", "GNU");
-	r = rnet_message_add_ascii(msg, "cliente", "201104");
+	r = rnet_message_add_ascii(msg, "cliente", "201105");
 	r = rnet_message_add_buffer(msg, "dados_val", header + header_start, header_end - header_start);
 	r = rnet_message_add_u32(msg, "tam_dados_val", 0);
 	r = rnet_message_add_u32(msg, "tam_dados_val_chave", 0);
