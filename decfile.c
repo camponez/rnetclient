@@ -176,6 +176,7 @@ static int parse_header_2014(struct pmhash *hash, char *buffer)
 	char *p = buffer;
 	char *key;
 	char *val;
+	char *tail;
 
 #define parse(field, sz) \
 	r = -ENOMEM; \
@@ -207,6 +208,12 @@ static int parse_header_2014(struct pmhash *hash, char *buffer)
 	parse("nome", 60);
 	parse("uf", 2);
 	parse("hash", 10);
+
+	if (p - buffer != RNET_HEADER_HEAD_2014) {
+		fprintf(stderr, "RNET_HEADER_HEAD_2014 in decfile.h needs to be adjusted to %i\n", p - buffer);
+		goto out_val;
+	}
+
 	parse("in_cert", 1);
 	parse("dt_nasc", 8);
 	parse("in_comp", 1);
@@ -279,8 +286,34 @@ static int parse_header_2014(struct pmhash *hash, char *buffer)
 	parse("nr_conta", 13);
 	parse("nr_dv_conta", 2);
 	parse("in_dv_conta", 1);
+
+	tail = p;
+
 	parse("versaotestpgd", 3);
 	parse("controle", 10);
+
+	if (*p++ != '\r') {
+		fprintf(stderr,
+			"missing CR at the %ith header character\n",
+			p - buffer);
+		goto out_val;
+	} else if (*p++ != '\n') {
+		fprintf(stderr,
+			"missing LF at the %ith header character\n",
+			p - buffer);
+		goto out_val;
+	} else if (*p != 0) {
+		fprintf(stderr,
+			"missing NUL at the %ith header character\n",
+			p - buffer);
+		goto out_val;
+	} else if (p - buffer != RNET_HEADER_SIZE_2014) {
+		fprintf(stderr, "RNET_HEADER_SIZE_2014 in decfile.h needs to be adjusted to %i,\nor parse_header in decfile.c needs updating\n", p - buffer);
+		goto out_val;
+	} else if (p - tail != RNET_HEADER_TAIL_2014) {
+		fprintf(stderr, "RNET_HEADER_TAIL_2014 in decfile.h needs to be adjusted to %i\n", p - tail);
+		goto out_val;
+	}
 
 	return 0;
 out_add:
@@ -297,6 +330,7 @@ static int parse_header_2013(struct pmhash *hash, char *buffer)
 	char *p = buffer;
 	char *key;
 	char *val;
+	char *tail;
 
 #define parse(field, sz) \
 	r = -ENOMEM; \
@@ -328,6 +362,12 @@ static int parse_header_2013(struct pmhash *hash, char *buffer)
 	parse("nome", 60);
 	parse("uf", 2);
 	parse("hash", 10);
+
+	if (p - buffer != RNET_HEADER_HEAD_2013) {
+		fprintf(stderr, "RNET_HEADER_HEAD_2013 in decfile.h needs to be adjusted to %i\n", p - buffer);
+		goto out_val;
+	}
+
 	parse("in_cert", 1);
 	parse("dt_nasc", 8);
 	parse("in_comp", 1);
@@ -395,8 +435,34 @@ static int parse_header_2013(struct pmhash *hash, char *buffer)
 	parse("vr_totisentos", 13);
 	parse("vr_totexclusivo", 13);
 	parse("vr_totpagamentos", 13);
+
+	tail = p;
+
 	parse("versaotestpgd", 3);
 	parse("controle", 10);
+
+	if (*p++ != '\r') {
+		fprintf(stderr,
+			"missing CR at the %ith header character\n",
+			p - buffer);
+		goto out_val;
+	} else if (*p++ != '\n') {
+		fprintf(stderr,
+			"missing LF at the %ith header character\n",
+			p - buffer);
+		goto out_val;
+	} else if (*p != 0) {
+		fprintf(stderr,
+			"missing NUL at the %ith header character\n",
+			p - buffer);
+		goto out_val;
+	} else if (p - buffer != RNET_HEADER_SIZE_2013) {
+		fprintf(stderr, "RNET_HEADER_SIZE_2013 in decfile.h needs to be adjusted to %i,\nor parse_header in decfile.c needs updating\n", p - buffer);
+		goto out_val;
+	} else if (p - tail != RNET_HEADER_TAIL_2013) {
+		fprintf(stderr, "RNET_HEADER_TAIL_2013 in decfile.h needs to be adjusted to %i\n", p - tail);
+		goto out_val;
+	}
 
 	return 0;
 out_add:

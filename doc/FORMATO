@@ -36,7 +36,7 @@ C: (6 bytes) + deflate(hash)
 		origem = "JA2R" (melhor repetir!)
 		so = "GNU"
 		cliente = "201105" (identificador de versão do receitanet)
-		dados_val = parte do cabeçalho do DEC (desce in_cert até vr_totpagamentos) bytes 112 a 750
+		dados_val = parte do cabeçalho do DEC (desde in_cert até vr_totpagamentos) bytes RNET_HEADER_HEAD_yyyy a RNET_HEADER_SIZE_yyyy - RNET_HEADER_TAIL_yyyy
 		tam_dados_val = 0x00 0x00 0x00 0x00 (4 bytes)
 		tam_dados_val_chave = 0x00 0x00 0x00 0x00 (4 bytes)
 		arquivos_restantes = 0x00 0x00 0x00 0x00 (4 bytes)

@@ -26,11 +26,6 @@
 #include "rnet_message.h"
 #include "decfile.h"
 
-#define RNET_HEADER_START_2013 111
-#define RNET_HEADER_END_2013 (RNET_HEADER_SIZE_2013 - 15)
-#define RNET_HEADER_START_2014 111
-#define RNET_HEADER_END_2014 (RNET_HEADER_SIZE_2014 - 15)
-
 int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 {
 	int r;
@@ -48,7 +43,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	char *header;
 	uint8_t ret;
 
-	size_t header_start, header_end;
+	size_t header_size, header_head, header_tail;
 
 	*msg = rnet_message_new();
 	if (*msg == NULL) {
@@ -72,14 +67,20 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	ret = strtoul(rnet_decfile_get_header_field(decfile, "in_ret"), NULL, 10);
 
 	if (!strcmp(exerc, "2014")) {
-		header_start = RNET_HEADER_START_2014;
-		header_end = RNET_HEADER_END_2014;
+		header_size = RNET_HEADER_SIZE_2014;
+		header_head = RNET_HEADER_HEAD_2014;
+		header_tail = RNET_HEADER_TAIL_2014;
 	} else if (!strcmp(exerc, "2013")) {
-		header_start = RNET_HEADER_START_2013;
-		header_end = RNET_HEADER_END_2013;
+		header_size = RNET_HEADER_SIZE_2013;
+		header_head = RNET_HEADER_HEAD_2013;
+		header_tail = RNET_HEADER_TAIL_2013;
 	} else {
 		return -EINVAL;
 	}
+
+	/* This was already checked at parse time.  */
+	if (strlen (header) != header_size)
+		abort ();
 
 	(*msg)->buffer[0] = 0x40;
 	(*msg)->len = 1;
@@ -107,7 +108,9 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	r = rnet_message_add_ascii(msg, "origem", "JA2R");
 	r = rnet_message_add_ascii(msg, "so", "GNU");
 	r = rnet_message_add_ascii(msg, "cliente", "201105");
-	r = rnet_message_add_buffer(msg, "dados_val", header + header_start, header_end - header_start);
+	r = rnet_message_add_buffer(msg, "dados_val",
+				    header + header_head,
+				    header_size - header_tail - header_head);
 	r = rnet_message_add_u32(msg, "tam_dados_val", 0);
 	r = rnet_message_add_u32(msg, "tam_dados_val_chave", 0);
 	r = rnet_message_add_u32(msg, "arquivos_restantes", 0);
