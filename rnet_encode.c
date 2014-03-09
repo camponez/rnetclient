@@ -103,7 +103,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	r = rnet_message_add_u16(msg, "versao_pgd", versao_pgd);
 	r = rnet_message_add_u8(msg, "critica_validador", 0x06);
 	r = rnet_message_add_ascii(msg, "ip_loc", "127.0.0.1");
-	r = rnet_message_add_ascii(msg, "versao_java", "1.7.0_03-icedtea;OpenJDK Runtime Environment");
+	r = rnet_message_add_ascii(msg, "versao_java", "1.5.0-gij;Free Software rnetclient pretending to be GNU Interpreter for Java");
 	r = rnet_message_add_ascii(msg, "origem", "JA2R");
 	r = rnet_message_add_ascii(msg, "so", "GNU");
 	r = rnet_message_add_ascii(msg, "cliente", "201104");

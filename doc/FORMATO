@@ -32,8 +32,7 @@ C: (6 bytes) + deflate(hash)
 		versao_pgd = 0x00 0x78 (120, mesmo que nr_versao no DEC, segundo arquivo de leiaute)
 		critica_validador = 0x06 (??)
 		ip_loc = "127.0.0.1" (endereço IP local)
-		versao_java = "1.7.0_03-icedtea;OpenJDK Runtime Environment" (versão do Java em ASCII)
-			será que rola uma versão do GCC?
+		versao_java = "1.5.0-gij;Free Software rnetclient pretending to be GNU Interpreter for Java" (versão do Java em ASCII; o ReceitaNet concatena as propriedades java.version e java.runtime.name, com ";" entre elas)
 		origem = "JA2R" (melhor repetir!)
 		so = "Linux"
 		cliente = "201104" (será a versão do receitanet?)
