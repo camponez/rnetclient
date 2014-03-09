@@ -71,12 +71,12 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	versao_pgd = strtoul(rnet_decfile_get_header_field(decfile, "nr_versao"), NULL, 10);
 	ret = strtoul(rnet_decfile_get_header_field(decfile, "in_ret"), NULL, 10);
 
-	if (!strcmp(ano, "2013")) {
-		header_start = RNET_HEADER_START_2013;
-		header_end = RNET_HEADER_END_2013;
-	} else if (!strcmp(ano, "2014")) {
+	if (!strcmp(exerc, "2014")) {
 		header_start = RNET_HEADER_START_2014;
 		header_end = RNET_HEADER_END_2014;
+	} else if (!strcmp(exerc, "2013")) {
+		header_start = RNET_HEADER_START_2013;
+		header_end = RNET_HEADER_END_2013;
 	} else {
 		return -EINVAL;
 	}
