@@ -151,11 +151,10 @@ int rnet_message_parse(struct rnet_message *msg, char *skey,
 	int b;
 	char *key;
 	int klen;
-	char *kcopy;
 	/* skip first byte */
 	i++;
 	while (i < len) {
-		j = buffer[i];
+		j = (unsigned char)buffer[i];
 		b = j & 0x80;
 		if (b)
 			;
@@ -164,10 +163,10 @@ int rnet_message_parse(struct rnet_message *msg, char *skey,
 		key = buffer + i;
 		klen = j;
 		i += j;
-		j = buffer[i];
+		j = (unsigned char)buffer[i];
 		i++;
 		if (b)
-			j = j << 8 | buffer[i++];
+			j = j << 8 | (unsigned char)buffer[i++];
 		*value = buffer + i;
 		*vlen = j;
 		i += j;
