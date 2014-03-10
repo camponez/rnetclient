@@ -180,12 +180,51 @@ static void usage(void)
 
 static int rnet_send(gnutls_session_t session, char *buffer, size_t len, int header)
 {
-	char *out;
-	size_t olen;
-	deflateRecord(buffer, len, &out, &olen, header);
-	gnutls_record_send(session, out, olen);
-	free(out);
-	return 0;
+	int r = 0;
+	/* Large files have to be uploaded as multiple
+	   separately-deflated chunks, because the compressed and
+	   uncompressed lengths in each record are encoded in unsigned
+	   16-bit integers each.
+
+	   The header can't be split into multiple chunks, and it
+	   should never have to, since it won't ever get even close to
+	   64KiB.
+
+	   The uploaded file may be larger: to upload such large
+	   files, it suffices to send multiple records till the entire
+	   file is transferred, without waiting for a response.  Since
+	   we've alread informed the server of the file size in the
+	   header, it knows exactly how much data to expect before
+	   sending a response.  It will only send an error message
+	   before that if it times us out.
+
+	   Odds are that any reasonably large size will do, but it
+	   can't be too close to 64KiB, otherwise there won't be room
+	   for the compressed length should it not compress well,
+	   which should never happen for capital-ASCII-only
+	   declaration files, but who knows?
+
+	   This chunk size worked at the first try, uploading a
+	   ~100KiB file, so let's stick with it.  */
+	const int maxc = 64472;
+	if (header && len > maxc)
+		return -1;
+
+	do {
+		char *out = NULL;
+		size_t olen;
+		size_t clen = len < maxc ? len : maxc;
+		r = deflateRecord(buffer, clen, &out, &olen, header);
+		if (!r) {
+			size_t n = gnutls_record_send(session, out, olen);
+			if (n != olen)
+				r = -1;
+		}
+		free(out);
+		buffer += clen;
+		len -= clen;
+	} while (len && !r);
+	return r;
 }
 
 static int rnet_recv(gnutls_session_t session, struct rnet_message **message)
