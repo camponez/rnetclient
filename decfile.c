@@ -210,7 +210,7 @@ static int parse_header_2014(struct pmhash *hash, char *buffer)
 	parse("hash", 10);
 
 	if (p - buffer != RNET_HEADER_HEAD_2014) {
-		fprintf(stderr, "RNET_HEADER_HEAD_2014 in decfile.h needs to be adjusted to %i\n", p - buffer);
+		fprintf(stderr, "RNET_HEADER_HEAD_2014 in decfile.h needs to be adjusted to %li\n", p - buffer);
 		goto out_val;
 	}
 
@@ -294,24 +294,24 @@ static int parse_header_2014(struct pmhash *hash, char *buffer)
 
 	if (*p++ != '\r') {
 		fprintf(stderr,
-			"missing CR at the %ith header character\n",
+			"missing CR at the %lith header character\n",
 			p - buffer);
 		goto out_val;
 	} else if (*p++ != '\n') {
 		fprintf(stderr,
-			"missing LF at the %ith header character\n",
+			"missing LF at the %lith header character\n",
 			p - buffer);
 		goto out_val;
 	} else if (*p != 0) {
 		fprintf(stderr,
-			"missing NUL at the %ith header character\n",
+			"missing NUL at the %lith header character\n",
 			p - buffer);
 		goto out_val;
 	} else if (p - buffer != RNET_HEADER_SIZE_2014) {
-		fprintf(stderr, "RNET_HEADER_SIZE_2014 in decfile.h needs to be adjusted to %i,\nor parse_header in decfile.c needs updating\n", p - buffer);
+		fprintf(stderr, "RNET_HEADER_SIZE_2014 in decfile.h needs to be adjusted to %li,\nor parse_header in decfile.c needs updating\n", p - buffer);
 		goto out_val;
 	} else if (p - tail != RNET_HEADER_TAIL_2014) {
-		fprintf(stderr, "RNET_HEADER_TAIL_2014 in decfile.h needs to be adjusted to %i\n", p - tail);
+		fprintf(stderr, "RNET_HEADER_TAIL_2014 in decfile.h needs to be adjusted to %li\n", p - tail);
 		goto out_val;
 	}
 
@@ -364,7 +364,7 @@ static int parse_header_2013(struct pmhash *hash, char *buffer)
 	parse("hash", 10);
 
 	if (p - buffer != RNET_HEADER_HEAD_2013) {
-		fprintf(stderr, "RNET_HEADER_HEAD_2013 in decfile.h needs to be adjusted to %i\n", p - buffer);
+		fprintf(stderr, "RNET_HEADER_HEAD_2013 in decfile.h needs to be adjusted to %li\n", p - buffer);
 		goto out_val;
 	}
 
@@ -443,24 +443,24 @@ static int parse_header_2013(struct pmhash *hash, char *buffer)
 
 	if (*p++ != '\r') {
 		fprintf(stderr,
-			"missing CR at the %ith header character\n",
+			"missing CR at the %lith header character\n",
 			p - buffer);
 		goto out_val;
 	} else if (*p++ != '\n') {
 		fprintf(stderr,
-			"missing LF at the %ith header character\n",
+			"missing LF at the %lith header character\n",
 			p - buffer);
 		goto out_val;
 	} else if (*p != 0) {
 		fprintf(stderr,
-			"missing NUL at the %ith header character\n",
+			"missing NUL at the %lith header character\n",
 			p - buffer);
 		goto out_val;
 	} else if (p - buffer != RNET_HEADER_SIZE_2013) {
-		fprintf(stderr, "RNET_HEADER_SIZE_2013 in decfile.h needs to be adjusted to %i,\nor parse_header in decfile.c needs updating\n", p - buffer);
+		fprintf(stderr, "RNET_HEADER_SIZE_2013 in decfile.h needs to be adjusted to %li,\nor parse_header in decfile.c needs updating\n", p - buffer);
 		goto out_val;
 	} else if (p - tail != RNET_HEADER_TAIL_2013) {
-		fprintf(stderr, "RNET_HEADER_TAIL_2013 in decfile.h needs to be adjusted to %i\n", p - tail);
+		fprintf(stderr, "RNET_HEADER_TAIL_2013 in decfile.h needs to be adjusted to %li\n", p - tail);
 		goto out_val;
 	}
 
