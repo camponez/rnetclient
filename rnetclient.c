@@ -1,5 +1,7 @@
 /*
- *  Copyright (C) 2012-2013  Thadeu Lima de Souza Cascardo <cascardo@minaslivre.org>
+ *  Copyright (C) 2012-2014  Thadeu Lima de Souza Cascardo <cascardo@minaslivre.org>
+ *  Copyright (C) 2014  Alexandre Oliva <lxoliva@fsfla.org>
+ *  Copyright (C) 2014  Sergio Durigan Junior <sergiodj@sergiodj.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
