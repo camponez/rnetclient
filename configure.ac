@@ -1,4 +1,4 @@
-AC_INIT(rnetclient,2014.0,softwares-impostos@fsfla.org)
+AC_INIT(rnetclient,2014.1,softwares-impostos@fsfla.org)
 AC_CONFIG_AUX_DIR(build-aux)
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME,AC_PACKAGE_VERSION)
 AC_PROG_CC
