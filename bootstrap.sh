@@ -10,5 +10,6 @@ AUX_DIR=build-aux
 test -d $AUX_DIR || mkdir -p $AUX_DIR
 
 aclocal
+autoheader
 autoconf
 automake --add-missing --copy --force --foreign

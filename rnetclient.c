@@ -27,9 +27,80 @@
 #include <netdb.h>
 #include <gnutls/gnutls.h>
 #include <zlib.h>
+#include <argp.h>
+#include "config.h"
 #include "decfile.h"
 #include "rnet_message.h"
 #include "rnet_encode.h"
+
+/* Program version and bug report address.  */
+
+const char *argp_program_version = PACKAGE_VERSION;
+const char *argp_program_bug_address = PACKAGE_BUGREPORT;
+
+/* Documentation strings.  */
+
+static const char rnetclient_doc[] =
+	"Send the Brazilian Income Tax Report to the Brazilian "
+	"Tax Authority";
+static const char rnetclient_args_doc[] =
+	"[-d|--declaration] FILE";
+
+/* Description and definition of each option accepted by the program.  */
+
+static const struct argp_option rnetclient_options_desc[] = {
+	{ "declaration", 'd', "FILE", OPTION_ARG_OPTIONAL,
+	  "The Income Tax Report file that will be sent.",
+	  0 },
+
+	{ NULL },
+};
+
+struct rnetclient_args {
+	/* File representing the declaration.  */
+	char *input_file;
+};
+
+/* Parser for command line arguments.  */
+
+static error_t rnetclient_parse_opt(int key, char *arg, struct argp_state *state)
+{
+	struct rnetclient_args *a = state->input;
+	switch (key) {
+	case 'd':
+		/* The user has explicitly provided a filename through
+		   the '-d' switch.  */
+		a->input_file = arg;
+		break;
+
+	case ARGP_KEY_ARG:
+		/* The user has possibly provided a filename without
+		   using any switches (e.g., by running './rnetclient
+		   file').  */
+		a->input_file = arg;
+		break;
+
+	case ARGP_KEY_END:
+		/* We have reached the end of the argument parsing.
+		   Let's check if the user has provided a filename.  */
+		if (a->input_file == NULL)
+			argp_error(state,
+				   "You need to provide the Income Tax Declaration "
+				   "filename.");
+	}
+
+	return 0;
+}
+
+/* Control struct used by argp.  */
+
+static struct argp rnetclient_argp = {
+	rnetclient_options_desc,
+	rnetclient_parse_opt,
+	rnetclient_args_doc,
+	rnetclient_doc,
+	NULL, NULL, NULL
+};
 
 static size_t chars2len (unsigned char buf[2]) {
 	return (buf[0] << 8 | buf[1]);
@@ -174,12 +245,6 @@ static int handshake(int c)
 	if (r != 14)
 		return -1;
 	return 0;
-}
-
-static void usage(void)
-{
-	fprintf(stderr, "rnetclient [filename]\n");
-	exit(1);
 }
 
 static int rnet_send(gnutls_session_t session, char *buffer, size_t len, int header)
@@ -333,17 +398,28 @@ int main(int argc, char **argv)
 	int r;
 	struct rnet_decfile *decfile;
 	struct rnet_message *message = NULL;
+	struct rnetclient_args rnet_args;
 	gnutls_session_t session;
 	int finish = 0;
 	char *cpf;
-	
-	if (argc < 2) {
-		usage();
-	}
+	error_t err;
 
-	decfile = rnet_decfile_open(argv[1]);
+	/* Parsing the command line arguments.  The argp_parse
+	   function calls exit() if there is some error during the
+	   parsing process (e.g., the user has provided an unknown
+	   flag or the parsing function has called argp_error).
+	   However, if our internal parsing function returns something
+	   different than zero, then argp_parse returns this value to
+	   us.  This is a bug, and should not happen in the current
+	   state.  */
+	memset(&rnet_args, 0, sizeof (rnet_args));
+	err = argp_parse (&rnetclient_argp, argc, argv, 0, NULL, &rnet_args);
+	if (err != 0)
+		fprintf(stderr, "internal error while parsing command line arguments.");
+
+	decfile = rnet_decfile_open(rnet_args.input_file);
 	if (!decfile) {
-		fprintf(stderr, "could not parse %s: %s\n", argv[1], strerror(errno));
+		fprintf(stderr, "could not parse file \"%s\": %s\n", rnet_args.input_file, strerror(errno));
 		exit(1);
 	}
 
