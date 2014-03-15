@@ -161,8 +161,12 @@ static int handshake(int c)
 	char buffer[16];
 	int r;
 	buffer[0] = 1;
-	write(c, buffer, 1);
-	write(c, "00000000000000", 14);
+	r = write(c, buffer, 1);
+	if (r < 1)
+		return -1;
+	r = write(c, "00000000000000", 14);
+	if (r < 14)
+		return -1;
 	r = read(c, buffer, 1);
 	if (r != 1 && buffer[0] != 'E')
 		return -1;
