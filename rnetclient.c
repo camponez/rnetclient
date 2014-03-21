@@ -51,7 +51,7 @@ static const char rnetclient_args_doc[] =
 /* Description and definition of each option accepted by the program.  */
 
 static const struct argp_option rnetclient_options_desc[] = {
-	{ "declaration", 'd', "FILE", OPTION_ARG_OPTIONAL,
+	{ "declaration", 'd', "FILE", 0,
 	  "The Income Tax Report file that will be sent.",
 	  0 },
 
