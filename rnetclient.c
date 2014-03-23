@@ -22,6 +22,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -46,7 +49,7 @@ static const char rnetclient_doc[] =
 	"Send the Brazilian Income Tax Report to the Brazilian "
 	"Tax Authority";
 static const char rnetclient_args_doc[] =
-	"[-d|--declaration] FILE";
+	"[-d|--declaration] FILE [-o|--output-dir DIRECTORY]";
 
 /* Description and definition of each option accepted by the program.  */
 
@@ -55,12 +58,19 @@ static const struct argp_option rnetclient_options_desc[] = {
 	  "The Income Tax Report file that will be sent.",
 	  0 },
 
+	{ "output-dir", 'o', "DIRECTORY", 0,
+	  "The directory where you wish to save the receipt.",
+	  0 },
+
 	{ NULL },
 };
 
 struct rnetclient_args {
 	/* File representing the declaration.  */
 	char *input_file;
+
+	/* Output directory to save the receipt.  */
+	char *output_dir;
 };
 
 /* Parser for command line arguments.  */
@@ -73,6 +83,10 @@ static error_t rnetclient_parse_opt(int key, char *arg, struct argp_state *state
 		/* The user has explicitly provided a filename through
 		   the '-d' switch.  */
 		a->input_file = arg;
+		break;
+
+	case 'o':
+		a->output_dir = arg;
 		break;
 
 	case ARGP_KEY_ARG:
@@ -331,58 +345,88 @@ static int rnet_recv(gnutls_session_t session, struct rnet_message **message)
 	return 0;
 }
 
-static void save_rec_file(char *cpf, char *buffer, int len)
+static void save_rec_file(char *cpf, char *buffer, int len, const struct rnetclient_args *args)
 {
 	int fd;
-	char *filename;
-	char *home, *tmpdir;
-	mode_t mask;
-	size_t fnlen;
-	int r;
-	home = getenv("HOME");
-	if (!home) {
-		tmpdir = getenv("TMPDIR");
-		if (!tmpdir)
-			tmpdir = "/tmp";
-		home = tmpdir;
+	char cwd[PATH_MAX];
+	char *path, *fname, *tmp;
+	size_t fname_len, r;
+	/* If the user provided the output directory where she wishes
+	   to save the receipt, then we use it.  Otherwise, we save
+	   the file in the current working directory (CWD).  */
+	if (args->output_dir == NULL)
+		path = getcwd(cwd, PATH_MAX);
+	else {
+		struct stat st;
+		if (stat(args->output_dir, &st) < 0) {
+			fprintf(stderr, "Could not stat directory \"%s\": %s\n", args->output_dir, strerror(errno));
+			return;
+		}
+		if (!S_ISDIR(st.st_mode)) {
+			fprintf(stderr, "Error: \"%s\" is a not a directory.\n", args->output_dir);
+			return;
+		}
+		path = args->output_dir;
 	}
-	fnlen = strlen(home) + strlen(cpf) + 13;
-	filename = malloc(fnlen);
-	snprintf(filename, fnlen, "%s/%s.REC.XXXXXX", home, cpf);
-	mask = umask(0177);
-	fd = mkstemp(filename);
+	/* Now it's time to decide which filename to write.  We use
+	   the declaration's filename as a base layout, because the
+	   proprietary version of the IRPF program only recognizes
+	   receipts if they have the same name as the declaration
+	   files (disconsidering the extensions).  For example, if the
+	   declaration file is named "123.DEC", the receipt should be
+	   named "123.REC".  Therefore, if the declaration file has
+	   the ".DEC" extension, we strip it out and add the ".REC".
+	   Otherwise, we use the default template, which is to save
+	   the receipt with the name "$CPF.REC".  */
+	tmp = strstr(args->input_file, ".DEC");
+	if (tmp != NULL && tmp[sizeof(".DEC") - 1] == '\0') {
+		const char *p;
+		/* We found the ".REC" extension.  */
+		p = strdup(args->input_file);
+		/* Replacing the ".DEC" by ".REC".  Fortunately, we
+		   just have to change one letter.  */
+		tmp = strstr(p, ".DEC");
+		tmp[1] = 'R';
+		fname_len = strlen(p) + strlen(path) + 2;
+		fname = alloca(fname_len);
+		snprintf(fname, fname_len, "%s/%s", path, p);
+	} else {
+		/* The declaration filename does not follow the
+		   convention, so we will not use it as a template.
+		   We just generate a filename using "$CPF.REC".  */
+		fname_len = strlen(cpf) + strlen(path) + sizeof(".REC") + 2;
+		fname = alloca(fname_len);
+		snprintf(fname, fname_len, "%s/%s.REC", path, cpf);
+	}
+	/* Now, open the file and write.  */
+	fd = open(fname, O_CREAT | O_WRONLY | O_EXCL, S_IRUSR | S_IWUSR);
 	if (fd < 0) {
-		fprintf(stderr, "Could not create receipt file: %s\n",
-						strerror(errno));
-		goto out;
+		fprintf(stderr, "Could not create receipt file \"%s\": %s\n", fname, strerror(errno));
+		return;
 	}
-	r = write(fd, buffer, len);
-	if (r != len) {
-		fprintf(stderr, "Could not write to receipt file%s%s\n",
-			r < 0 ? ": " : ".",
-			r < 0 ? strerror(errno) : "");
-		goto out;
-	}
-	fprintf(stderr, "Wrote the receipt to %s.\n", filename);
-out:
+	do {
+		r = write(fd, buffer, len);
+	} while (r != len && errno == EAGAIN);
+	if (r != len)
+		fprintf(stderr, "Could not write to receipt file: %s", strerror(errno));
+	else
+		fprintf(stderr, "Wrote the receipt file to %s.\n", fname);
 	close(fd);
-	free(filename);
-	umask(mask);
 }
 
-static void handle_response_text_and_file(char *cpf, struct rnet_message *message)
+static void handle_response_text_and_file(char *cpf, struct rnet_message *message, const struct rnetclient_args *args)
 {
 	char *value;
 	int vlen;
 	if (!rnet_message_parse(message, "texto", &value, &vlen))
 		fprintf(stderr, "%.*s\n", vlen, value);
 	if (!rnet_message_parse(message, "arquivo", &value, &vlen))
-		save_rec_file(cpf, value, vlen);
+		save_rec_file(cpf, value, vlen, args);
 }
 
-static void handle_response_already_found(char *cpf, struct rnet_message *message)
+static void handle_response_already_found(char *cpf, struct rnet_message *message, const struct rnetclient_args *args)
 {
-	handle_response_text_and_file(cpf, message);
+	handle_response_text_and_file(cpf, message, args);
 }
 
 static void handle_response_error(struct rnet_message *message)
@@ -457,19 +501,19 @@ int main(int argc, char **argv)
 	}
 	switch (message->buffer[0]) {
 	case 1: /* go ahead */
-		handle_response_text_and_file(cpf, message);
+		handle_response_text_and_file(cpf, message, &rnet_args);
 		break;
 	case 3: /* error */
 		handle_response_error(message);
 		finish = 1;
 		break;
 	case 4:
-		handle_response_already_found(cpf, message);
+		handle_response_already_found(cpf, message, &rnet_args);
 		finish = 1;
 		break;
 	case 2:
 	case 5:
-		handle_response_text_and_file(cpf, message);
+		handle_response_text_and_file(cpf, message, &rnet_args);
 		finish = 1;
 		break;
 	}
@@ -495,7 +539,7 @@ int main(int argc, char **argv)
 	case 4:
 	case 5:
 	case 1:
-		handle_response_text_and_file(cpf, message);
+		handle_response_text_and_file(cpf, message, &rnet_args);
 		break;
 	}
 	
