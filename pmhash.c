@@ -44,7 +44,7 @@ struct pmhash * pmhash_new(void)
 
 int pmhash_add(struct pmhash **pmhash, char *key, void *val)
 {
-	int i;
+	unsigned int i;
 	struct pmhash *hash = *pmhash;
 	i = 0;
 repeat:
@@ -74,7 +74,7 @@ out:
 
 void * pmhash_get(struct pmhash *pmhash, char *key)
 {
-	int i;
+	unsigned int i;
 	for (i = 0; i < pmhash->len; i++) {
 		if (pmhash->items[i].key == NULL)
 			return NULL;
@@ -86,7 +86,7 @@ void * pmhash_get(struct pmhash *pmhash, char *key)
 
 void pmhash_del(struct pmhash *pmhash)
 {
-	int i;
+	unsigned int i;
 	for (i = 0; i < pmhash->len; i++) {
 		if (pmhash->items[i].key == NULL)
 			break;

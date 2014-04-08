@@ -23,8 +23,8 @@
 #include <stdint.h>
 
 struct rnet_message {
-	int len;
-	int alen;
+	size_t len;
+	size_t alen;
 	char buffer[];
 };
 

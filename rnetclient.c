@@ -289,7 +289,7 @@ static int rnet_send(gnutls_session_t session, char *buffer, size_t len, int hea
 
 	   This chunk size worked at the first try, uploading a
 	   ~100KiB file, so let's stick with it.  */
-	const int maxc = 64472;
+	const unsigned int maxc = 64472;
 	if (header && len > maxc)
 		return -1;
 
@@ -347,7 +347,8 @@ static void save_rec_file(char *cpf, char *buffer, int len, const struct rnetcli
 	int fd;
 	char cwd[PATH_MAX];
 	char *path, *fname, *tmp;
-	size_t fname_len, r;
+	size_t fname_len;
+	ssize_t r;
 	/* If the user provided the output directory where she wishes
 	   to save the receipt, then we use it.  Otherwise, we save
 	   the file in the current working directory (CWD).  */
@@ -403,7 +404,7 @@ static void save_rec_file(char *cpf, char *buffer, int len, const struct rnetcli
 	}
 	do {
 		r = write(fd, buffer, len);
-	} while (r != len && errno == EAGAIN);
+	} while (r < 0 && errno == EAGAIN);
 	if (r != len)
 		fprintf(stderr, "Could not write to receipt file: %s", strerror(errno));
 	else

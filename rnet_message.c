@@ -74,8 +74,8 @@ static int add_field(struct rnet_message **message, char *key, int klen,
 	int n = 0;
 	char *buffer;
 	struct rnet_message *msg = *message;
-	if ((msg->alen - msg->len) < (klen + vlen + 3)) {
-		if (rnet_message_expand(message, MAX(msg->len, klen + vlen + 3)))
+	if ((msg->alen - msg->len) < (size_t) (klen + vlen + 3)) {
+		if (rnet_message_expand(message, MAX(msg->len, (size_t) (klen + vlen + 3))))
 			return -ENOMEM;
 		msg = *message;
 	}
@@ -147,18 +147,16 @@ int rnet_message_parse(struct rnet_message *msg, char *skey,
 {
 	char * buffer = msg->buffer;
 	size_t len = msg->len;
-	int i = 0;
+	unsigned int i = 0;
 	unsigned int j;
 	int b;
 	char *key;
-	int klen;
+	unsigned int klen;
 	/* skip first byte */
 	i++;
 	while (i < len) {
 		j = (unsigned char)buffer[i];
 		b = j & 0x80;
-		if (b)
-			;
 		j = j & 0x7f;
 		i++;
 		key = buffer + i;
