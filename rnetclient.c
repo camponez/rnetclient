@@ -154,9 +154,9 @@ static int deflateRecord(char *buffer, size_t len, char **out, size_t *olen, int
 		deflateEnd(&zstrm);
 		return -1;
 	}
-	zstrm.next_in = buffer;
+	zstrm.next_in = (z_const Bytef *) buffer;
 	zstrm.avail_in = len;
-	zstrm.next_out = *out + 6;
+	zstrm.next_out = (Bytef *) *out + 6;
 	zstrm.avail_out = len * 2 + 30;
 	while ((r = deflate(&zstrm, Z_FINISH)) != Z_STREAM_END &&
 		zstrm.avail_out > 0);
@@ -185,15 +185,15 @@ static int inflateRecord(char *buffer, size_t len, char **out, size_t *olen)
 	zstrm.opaque = Z_NULL;
 	if ((r = inflateInit(&zstrm)) != Z_OK)
 		return -1;
-	*olen = chars2len(buffer+3);
+	*olen = chars2len((unsigned char *) buffer+3);
 	*out = malloc(*olen);
 	if (!out) {
 		inflateEnd(&zstrm);
 		return -1;
 	}
-	zstrm.next_in = buffer + 6;
+	zstrm.next_in = (z_const Bytef *) buffer + 6;
 	zstrm.avail_in = len - 6;
-	zstrm.next_out = *out;
+	zstrm.next_out = (Bytef *) *out;
 	zstrm.avail_out = *olen;
 	while ((r = inflate(&zstrm, Z_FINISH)) != Z_STREAM_END &&
 		zstrm.avail_out > 0);
@@ -213,10 +213,8 @@ static int connect_rnet(int *c)
 	struct addrinfo *addresses;
 	struct addrinfo *addr;
 	struct addrinfo hint;
-	struct sockaddr_in saddr;
 	int r;
 	int fd = *c = -1;
-	int i;
 	memset(&hint, 0, sizeof(hint));
 	hint.ai_family = AF_UNSPEC;
 	hint.ai_socktype = SOCK_STREAM;
@@ -316,17 +314,16 @@ static int rnet_recv(gnutls_session_t session, struct rnet_message **message)
 {
 	char *out;
 	size_t olen;
-	int r;
 	char *buffer;
 	size_t len;
 	rnet_message_expand(message, 6);
 	buffer = (*message)->buffer;
-	r = gnutls_record_recv(session, buffer, 6);
+	gnutls_record_recv(session, buffer, 6);
 	if (buffer[0] == 0x01) {
-		len = chars2len(buffer+1);
+		len = chars2len((unsigned char *) buffer+1);
 		rnet_message_expand(message, len);
 		buffer = (*message)->buffer + 6;
-		r = gnutls_record_recv(session, buffer, len);
+		gnutls_record_recv(session, buffer, len);
 		inflateRecord(buffer - 6, len + 6, &out, &olen);
 		rnet_message_del(*message);
 		*message = NULL;
@@ -335,10 +332,10 @@ static int rnet_recv(gnutls_session_t session, struct rnet_message **message)
 		(*message)->len = olen;
 		free(out);
 	} else {
-		len = chars2len(buffer+1);
+		len = chars2len((unsigned char *) buffer+1);
 		rnet_message_expand(message, len - 1);
 		buffer = (*message)->buffer + 6;
-		r = gnutls_record_recv(session, buffer, len - 1);
+		gnutls_record_recv(session, buffer, len - 1);
 		(*message)->len = len + 4;
 		rnet_message_strip(*message, 4);
 	}
