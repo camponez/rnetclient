@@ -312,8 +312,8 @@ static int rnet_send(gnutls_session_t session, char *buffer, size_t len, int hea
 
 static int rnet_recv(gnutls_session_t session, struct rnet_message **message)
 {
-	char *out;
-	size_t olen;
+	char *out = NULL;
+	size_t olen = 0;
 	char *buffer;
 	size_t len;
 	rnet_message_expand(message, 6);
