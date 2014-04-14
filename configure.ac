@@ -31,15 +31,23 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_LANG_WERROR
 
-dnl Checking for GNUTLS and libgcrypt.
-PKG_CHECK_MODULES(GNUTLS, gnutls >= 1.4.0, , AC_MSG_ERROR(Could not find gnutls))
-AM_PATH_LIBGCRYPT(,,AC_MSG_ERROR(Could not find gcrypt))
+dnl Checking for GNUTLS.
+AC_SEARCH_LIBS([gnutls_init], [gnutls],	[],
+	AC_MSG_ERROR([could not find gnutls]))
+
+dnl Checking for libgcrypt.
+AC_SEARCH_LIBS([gcry_cipher_open], [gcrypt], [],
+	AC_MSG_ERROR([could not find libgcrypt]))
+
+dnl Checking for zlib.
+AC_SEARCH_LIBS([zlibVersion], [z], [],
+	AC_MSG_ERROR([could not find zlib]))
 
 dnl Setting useful flags.
-LIBS="$LIBGCRYPT_LIBS $GNUTLS_LIBS $LIBS -lz"
-CFLAGS="$LIBGCRYPT_CFLAGS $GNUTLS_CFLAGS \
-	-Wall -Werror -Wextra -Wunused -Wunused-variable \
-	$CFLAGS"
+CFLAGS="`pkg-config --cflags gnutls 2> /dev/null` \
+`pkg-config --cflags zlib 2> /dev/null` \
+-Wall -Werror -Wextra -Wunused -Wunused-variable \
+$CFLAGS"
 
 dnl Outputting the necessary files for the build.
 AC_CONFIG_HEADERS([config.h])
