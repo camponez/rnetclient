@@ -1,6 +1,6 @@
 AC_INIT(rnetclient,2014.1,softwares-impostos@fsfla.org)
 AC_CONFIG_AUX_DIR(build-aux)
-AM_INIT_AUTOMAKE(AC_PACKAGE_NAME,AC_PACKAGE_VERSION)
+AM_INIT_AUTOMAKE
 AC_PROG_CC
 AC_PROG_INSTALL
 PKG_CHECK_MODULES(GNUTLS, gnutls >= 1.4.0, , AC_MSG_ERROR(Could not find gnutls))
