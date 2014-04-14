@@ -29,6 +29,7 @@ AM_INIT_AUTOMAKE
 dnl Do we have a usable compiler and 'install'?
 AC_PROG_CC
 AC_PROG_INSTALL
+AC_LANG_WERROR
 
 dnl Checking for GNUTLS and libgcrypt.
 PKG_CHECK_MODULES(GNUTLS, gnutls >= 1.4.0, , AC_MSG_ERROR(Could not find gnutls))
@@ -36,7 +37,9 @@ AM_PATH_LIBGCRYPT(,,AC_MSG_ERROR(Could not find gcrypt))
 
 dnl Setting useful flags.
 LIBS="$LIBGCRYPT_LIBS $GNUTLS_LIBS $LIBS -lz"
-CFLAGS="$LIBGCRYPT_CFLAGS $GNUTLS_CFLAGS $CFLAGS"
+CFLAGS="$LIBGCRYPT_CFLAGS $GNUTLS_CFLAGS \
+	-Wall -Werror -Wextra -Wunused -Wunused-variable \
+	$CFLAGS"
 
 dnl Outputting the necessary files for the build.
 AC_CONFIG_HEADERS([config.h])
