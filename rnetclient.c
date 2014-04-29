@@ -18,6 +18,7 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#define _GNU_SOURCE
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -378,9 +379,9 @@ static void save_rec_file(char *cpf, char *buffer, int len, const struct rnetcli
 	   the receipt with the name "$CPF.REC".  */
 	tmp = strstr(args->input_file, ".DEC");
 	if (tmp != NULL && tmp[sizeof(".DEC") - 1] == '\0') {
-		const char *p;
+		char *p;
 		/* We found the ".REC" extension.  */
-		p = strdup(args->input_file);
+		p = strdup(basename(args->input_file));
 		/* Replacing the ".DEC" by ".REC".  Fortunately, we
 		   just have to change one letter.  */
 		tmp = strstr(p, ".DEC");
@@ -388,6 +389,7 @@ static void save_rec_file(char *cpf, char *buffer, int len, const struct rnetcli
 		fname_len = strlen(p) + strlen(path) + 2;
 		fname = alloca(fname_len);
 		snprintf(fname, fname_len, "%s/%s", path, p);
+		free(p);
 	} else {
 		/* The declaration filename does not follow the
 		   convention, so we will not use it as a template.
