@@ -51,4 +51,7 @@ $CFLAGS"
 
 dnl Outputting the necessary files for the build.
 AC_CONFIG_HEADERS([config.h])
-AC_OUTPUT(Makefile)
+AC_OUTPUT([Makefile]
+	  [doc/Makefile]
+	  [doc/man/Makefile]
+	  [doc/man/pt_BR/Makefile])

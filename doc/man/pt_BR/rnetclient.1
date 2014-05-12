@@ -1,0 +1,102 @@
+.\" Hey, EMACS: -*- nroff -*-
+.\" Copyright (C) 2014 Sergio Durigan Junior <sergiodj@sergiodj.net>
+.\"
+.\" This document is dual-licensed.  You may distribute and/or modify
+.\" it under the terms of either of the following licenses:
+.\"
+.\" * The GNU General Public License, as published by the Free
+.\"   Software Foundation, version 3 or (at your option) any later
+.\"   version.  You should have received a copy of the GNU General
+.\"   Public License along with this program.  If not, see
+.\"   <http://www.gnu.org/licenses/>.
+.\"
+.\" * The GNU Free Documentation License, as published by the Free
+.\"   Software Foundation, version 1.2 or (at your option) any later
+.\"   version, with no Invariant Sections, no Front-Cover Texts, and
+.\"   no Back-Cover Texts.  You should have received a copy of the GNU
+.\"   Free Documentation License along with this program.  If not, see
+.\"   <http://www.gnu.org/licenses/>.
+.\"
+.\" $Id$
+.TH RNETCLIENT 1 "versão 2014.1" "Abril de 2014"
+.\" Por favor, ajuste a data sempre que revisar esta página de manual.
+.\"
+
+.SH NOME
+
+rnetclient \- Envia a Declaração de Imposto de Renda para a Receita
+Federal
+
+.SH SINÓPSE
+.B rnetclient
+[\-d|\-\-declaration] <ARQUIVO> [\-o <DIRETÓRIO>|\-\-output-dir=<DIRETÓRIO>]
+.br
+
+.SH DESCRIÇÃO
+
+\fBrnetclient\fP é utilizado para enviar a Declaração de Imposto de
+Renda para a Receita Federal.  Ele comunica-se com o servidor oficial
+da Receita Federal, garante que uma conexão segura está estabelecida,
+e envia o arquivo.  O programa é o produto de uma engenharia reversa
+no ReceitaNet, que é a versão proprietária e não-livre do software que
+realiza a mesma tarefa que o \fBrnetclient\fP.
+
+.SH OPÇÕES
+
+.\" --declaration
+.TP
+.B \-d <ARQUIVO>, \-\-declaration=<ARQUIVO>
+Fornece o nome do arquivo da declaração que será enviado à Receita
+Federal.  Este argumento é obrigatório.  Por razões históricas, o
+usuário também pode fornecer o nome do arquivo de declaração sem
+especificar o modificador \fB\-d\fP.
+
+.\" --output-dir
+.TP
+.B \-o <DIRETÓRIO>, \-\-output\-dir=<DIRETÓRIO>
+Especifica o diretório de saída onde o recibo será salvo.  Este
+argumento é opcional; se nenhum diretório de saída for especificado,
+então o recibo será salvo no diretório corrente (CWD).
+
+.\" --version
+.TP
+.B \-V, \-\-version
+Imprime a versão do programa e termina a execução.
+
+
+.SH HISTÓRIA E MOTIVAÇÃO
+
+Não há como falar sobre o rnetclient sem mencionar o IRPF-Livre, que é
+um projeto mais antigo iniciado e mantido por Alexandre Oliva.  Este
+projeto existe porque a Receita Federal não disponibiliza o
+código-fonte do software utilizado para preencher a Declaração de
+Imposto de Renda.  O Alexandre ainda luta para fazer com que a Receita
+Federal disponibilize este programa como Software Livre, mas ele
+também decidiu produzir e lançar uma versão Livre deste software.  No
+entanto, ainda havia mais um software de código fechado necessário
+para que fosse possível cumprir suas obrigações com o governo
+Brasileiro: o programa utilizado para submeter a declaração para a
+Receita Federal.  Foi assim que o rnetclient nasceu.
+
+O programa começou como um projeto pessoal de Thadeu Lima de Souza
+Cascardo.  Ele teve que fazer engenharia reversa no software
+proprietário de maneira a conseguir replicar sua funcionalidade, e fez
+o primeiro lançamento do programa em 2013.  Em 2014, Alexandre Oliva e
+Sergio Durigan Junior juntaram-se ao projeto e ajudaram na
+disponibilização da segunda versão.
+
+.SH PROBLEMAS
+
+Problemas deverão ser reportados para \fB<softwares-impostos@fsfla.org>\fP.
+
+.SH PÁGINA NA INTERNET
+
+\fB<http://wiki.libreplanetbr.org/rnetclient>\fP
+
+.SH AUTORES
+
+Thadeu Lima de Souza Cascardo  <cascardo (at) cascardo (dot) info>
+.br
+Sergio Durigan Junior  <sergiodj (at) sergiodj (dot) net>
+.br
+Alexandre Oliva  <lxoliva (at) fsfla (dot) org>
