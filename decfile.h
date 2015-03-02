@@ -28,6 +28,9 @@
 #define RNET_HEADER_SIZE_2014 793
 #define RNET_HEADER_HEAD_2014 111
 #define RNET_HEADER_TAIL_2014  15
+#define RNET_HEADER_SIZE_2015 871
+#define RNET_HEADER_HEAD_2015 111
+#define RNET_HEADER_TAIL_2015  15
 
 struct rnet_decfile;
 struct rnet_decfile * rnet_decfile_open(char *filename);

@@ -76,6 +76,7 @@ static void decfile_release_lines(struct rnet_decfile *decfile)
 static char * get_header(struct rnet_decfile *decfile);
 static int parse_header_2013(struct pmhash *hash, char *buffer);
 static int parse_header_2014(struct pmhash *hash, char *buffer);
+static int parse_header_2015(struct pmhash *hash, char *buffer);
 static int decfile_parse_file(struct rnet_decfile *decfile);
 
 static int decfile_parse_header(struct rnet_decfile *decfile)
@@ -88,6 +89,8 @@ static int decfile_parse_header(struct rnet_decfile *decfile)
 		return parse_header_2013(decfile->header, buffer);
 	case RNET_HEADER_SIZE_2014:
 		return parse_header_2014(decfile->header, buffer);
+	case RNET_HEADER_SIZE_2015:
+		return parse_header_2015(decfile->header, buffer);
 	default:
 		return -EINVAL;
 	}
@@ -169,6 +172,177 @@ static char * get_header(struct rnet_decfile *decfile)
 		}
 	}
 	return NULL;
+}
+
+static int parse_header_2015(struct pmhash *hash, char *buffer)
+{
+	int r;
+	char *p = buffer;
+	char *key;
+	char *val;
+	char *tail;
+
+#define parse(field, sz) \
+	r = -ENOMEM; \
+	val = malloc(sz + 1); \
+	if (!val) \
+		goto out_val; \
+	val[sz] = 0; \
+	memcpy(val, p, sz); \
+	p += sz; \
+	key = strdup(field); \
+	if (!key) \
+		goto out_key; \
+	if (pmhash_add(&hash, key, val)) \
+		goto out_add;
+
+	parse("sistema", 8);
+	parse("exerc", 4);
+	if (strcmp(val, "2015")) {
+		r = -EINVAL;
+		goto out_val;
+	}
+	parse("ano", 4);
+	parse("codigo_recnet", 4);
+	parse("in_ret", 1);
+	parse("cpf", 11);
+	parse("filler", 3);
+	parse("tipo_ni", 1);
+	parse("nr_versao", 3);
+	parse("nome", 60);
+	parse("uf", 2);
+	parse("hash", 10);
+
+	if (p - buffer != RNET_HEADER_HEAD_2015) {
+		fprintf(stderr, "RNET_HEADER_HEAD_2015 in decfile.h needs to be adjusted to %ti\n", p - buffer);
+		goto out_val;
+	}
+
+	parse("in_cert", 1);
+	parse("dt_nasc", 8);
+	parse("in_comp", 1);
+	parse("in_res", 1);
+	parse("in_gerada", 1);
+	parse("nr_recibo_anterior", 10);
+	parse("in_pgd", 1);
+	parse("so", 14);
+	parse("versao_so", 7);
+	parse("jvm", 9);
+	parse("nr_recibo", 10);
+	parse("municipio", 4);
+	parse("conjuge", 11);
+	parse("obrig", 1);
+	parse("impdevido", 13);
+	parse("nr_recibo", 10);
+	parse("in_seg", 1);
+	parse("imppago", 2);
+	parse("impant", 1);
+	parse("mudend", 1);
+	parse("cep", 8);
+	parse("debito", 1);
+	parse("banco", 3);
+	parse("agencia", 4);
+	parse("filler", 1);
+	parse("data_julgado", 8);
+	parse("imppagar", 13);
+	parse("tribfonte", 1);
+	parse("cpfrra", 11);
+	parse("trib_rra", 1);
+	parse("cpf_rra2", 11);
+	parse("trib_3rra", 1);
+	parse("cpf_rra3", 11);
+	parse("trib_4rra", 1);
+	parse("cpf_rra4", 11);
+	parse("vr_doacao", 13);
+	parse("cnpj1", 14);
+	parse("cnpj2", 14);
+	parse("cnpj3", 14);
+	parse("cnpj4", 14);
+	parse("cpf_dep1", 11);
+	parse("dnas_dep1", 8);
+	parse("cpf_dep2", 11);
+	parse("dnas_dep2", 8);
+	parse("cpf_dep3", 11);
+	parse("dnas_dep3", 8);
+	parse("cpf_dep4", 11);
+	parse("dnas_dep4", 8);
+	parse("cpf_dep5", 11);
+	parse("dnas_dep5", 8);
+	parse("cpf_dep6", 11);
+	parse("dnas_dep6", 8);
+	parse("cnpj_med1", 14);
+	parse("cnpj_med2", 14);
+	parse("cpf_alim", 11);
+	parse("cpf_invent", 11);
+	parse("municipio", 40);
+	parse("contribuinte", 60);
+	parse("filler", 11);
+	parse("mac", 12);
+	parse("data_nao_residente", 8);
+	parse("cpf_procurador", 11);
+	parse("obrigatoriedade", 3);
+	parse("rendtrib", 13);
+	parse("cnpj_prev", 14);
+	parse("cnpj_prev2", 14);
+	parse("vr_totisentos", 13);
+	parse("vr_totexclusivo", 13);
+	parse("vr_totpagamentos", 13);
+	parse("nr_conta", 13);
+	parse("nr_dv_conta", 2);
+	parse("in_dv_conta", 1);
+
+	parse("codnaturezaocup", 2);
+	parse("cpfdomestic@", 11);
+	parse("nitdomestic@", 11);
+	parse("cpfdomestic@2", 11);
+	parse("nitdomestic@2", 11);
+	parse("cpfdomestic@3", 11);
+	parse("nitdomestic@3", 11);
+	parse("deciniciada", 1);
+	parse("utilpgd", 1);
+	parse("utilapp", 1);
+	parse("utilonline", 1);
+	parse("utilrascunho", 1);
+	parse("utilprepreenchida", 1);
+	parse("utilfontes", 1);
+	parse("utilplanosaude", 1);
+	parse("utilrecuperar", 1);
+	parse("dectransmitida", 1);
+	tail = p;
+
+	parse("versaotestpgd", 3);
+	parse("controle", 10);
+
+	if (*p++ != '\r') {
+		fprintf(stderr,
+			"missing CR at the %tith header character\n",
+			p - buffer);
+		goto out_val;
+	} else if (*p++ != '\n') {
+		fprintf(stderr,
+			"missing LF at the %tith header character\n",
+			p - buffer);
+		goto out_val;
+	} else if (*p != 0) {
+		fprintf(stderr,
+			"missing NUL at the %tith header character\n",
+			p - buffer);
+		goto out_val;
+	} else if (p - buffer != RNET_HEADER_SIZE_2015) {
+		fprintf(stderr, "RNET_HEADER_SIZE_2015 in decfile.h needs to be adjusted to %ti,\nor parse_header in decfile.c needs updating\n", p - buffer);
+		goto out_val;
+	} else if (p - tail != RNET_HEADER_TAIL_2015) {
+		fprintf(stderr, "RNET_HEADER_TAIL_2015 in decfile.h needs to be adjusted to %ti\n", p - tail);
+		goto out_val;
+	}
+
+	return 0;
+out_add:
+	free(key);
+out_key:
+	free(val);
+out_val:
+	return r;
 }
 
 static int parse_header_2014(struct pmhash *hash, char *buffer)
