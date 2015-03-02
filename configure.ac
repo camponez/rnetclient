@@ -19,7 +19,7 @@ dnl Run ./bootstrap.sh on the source directory in order to process this
 dnl file.
 
 dnl Initialization routines.
-AC_INIT([rnetclient], [2014.2], [softwares-impostos@fsfla.org], [],
+AC_INIT([rnetclient], [2015.0], [softwares-impostos@fsfla.org], [],
 	[http://wiki.libreplanetbr.org/rnetclient])
 dnl If you update this auxiliary directory, remember to also update the
 dnl value of $AUX_DIR in the 'bootstrap.sh' script.
