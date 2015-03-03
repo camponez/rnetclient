@@ -489,7 +489,12 @@ int main(int argc, char **argv)
 		fprintf(stderr, "error in handshake: %s\n",
 				gnutls_strerror(r));
 
-	rnet_encode(decfile, &message);
+	r = rnet_encode(decfile, &message);
+	if (r < 0) {
+		fprintf(stderr, "error encoding message, file not supported?\n");
+		goto out;
+	}
+
 	rnet_send(session, message->buffer, message->len, 1);
 	rnet_message_del(message);
 
