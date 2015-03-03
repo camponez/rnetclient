@@ -67,7 +67,11 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	versao_pgd = strtoul(rnet_decfile_get_header_field(decfile, "nr_versao"), NULL, 10);
 	ret = strtoul(rnet_decfile_get_header_field(decfile, "in_ret"), NULL, 10);
 
-	if (!strcmp(exerc, "2014")) {
+	if (!strcmp(exerc, "2015")) {
+		header_size = RNET_HEADER_SIZE_2015;
+		header_head = RNET_HEADER_HEAD_2015;
+		header_tail = RNET_HEADER_TAIL_2015;
+	} else if (!strcmp(exerc, "2014")) {
 		header_size = RNET_HEADER_SIZE_2014;
 		header_head = RNET_HEADER_HEAD_2014;
 		header_tail = RNET_HEADER_TAIL_2014;
