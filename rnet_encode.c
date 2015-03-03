@@ -29,7 +29,7 @@
 
 int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 {
-	int r;
+	int r = -EIO;
 
 	uint32_t tp_arq;
 	uint32_t id_dec;
@@ -54,7 +54,7 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	file_len = rnet_decfile_get_file(decfile)->len;
 	hash = rnet_decfile_get_file_hash(decfile);
 	if (!hash)
-		return -1;
+		goto out;
 	header = rnet_decfile_get_header(decfile);
 
 	codigo_recnet = rnet_decfile_get_header_field(decfile, "codigo_recnet");
@@ -76,7 +76,8 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 		header_head = RNET_HEADER_HEAD_2013;
 		header_tail = RNET_HEADER_TAIL_2013;
 	} else {
-		return -EINVAL;
+		r = -EINVAL;
+		goto out2;
 	}
 
 	/* This was already checked at parse time.  */
@@ -119,6 +120,12 @@ int rnet_encode(struct rnet_decfile *decfile, struct rnet_message **msg)
 	free(hash);
 
 	if (r < 0)
-		return r;
+		goto out;
 	return 0;
+
+out2:
+	free(hash);
+out:
+	rnet_message_del(*msg);
+	return r;
 }
